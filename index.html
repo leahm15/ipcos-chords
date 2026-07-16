@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPCOS Chords</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12211D;
+    --surface: #1B2E27;
+    --surface-alt: #223A31;
+    --ink: #EDE6D6;
+    --ink-dim: #A9B8AE;
+    --gold: #D4AF6A;
+    --gold-dim: rgba(212,175,106,0.16);
+    --line: rgba(237,230,214,0.12);
+    --danger: #C1666B;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at top, #16281f 0%, var(--bg) 55%);
+    color: var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background: var(--gold-dim); }
+  button{ font-family:inherit; cursor:pointer; }
+  input, textarea, select{ font-family:inherit; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; animation: none !important; }
+  }
+
+  .app{ max-width: 720px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* ---------- Header ---------- */
+  .brand{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; }
+  .brand h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size: 30px;
+    letter-spacing:-0.01em; margin:0; color: var(--ink);
+  }
+  .brand h1 .amp{ color: var(--gold); font-style: italic; font-weight:500; }
+  .brand .tag{ font-size:12px; color:var(--ink-dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .brand .tag[data-mode="cloud"]{ color:var(--gold); }
+  .brand .tag[data-mode="local"]{ color:var(--danger); }
+
+  /* ---------- Search + add row ---------- */
+  .toolbar{ display:flex; gap:10px; margin-bottom:20px; }
+  .search-wrap{ position:relative; flex:1; }
+  .search-wrap input{
+    width:100%; background: var(--surface); border:1px solid var(--line);
+    color: var(--ink); border-radius: 999px; padding:11px 16px 11px 38px;
+    font-size:14px; outline:none;
+  }
+  .search-wrap input:focus{ border-color: var(--gold); }
+  .search-wrap svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); opacity:0.55; }
+  .btn-gold{
+    background: var(--gold); color:#1B2E27; border:none; border-radius:999px;
+    padding:0 18px; font-size:14px; font-weight:600; white-space:nowrap;
+    display:flex; align-items:center; gap:6px;
+  }
+  .btn-gold:active{ transform: scale(0.97); }
+
+  /* ---------- Sunday set list ---------- */
+  .setlist-section{
+    background:linear-gradient(145deg, rgba(212,175,106,0.12), rgba(27,46,39,0.96));
+    border:1px solid rgba(212,175,106,0.34); border-radius:18px;
+    padding:17px; margin-bottom:24px;
+  }
+  .setlist-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:13px; }
+  .setlist-heading h2{ font-family:'Fraunces', serif; font-size:21px; line-height:1.1; margin:0 0 4px; }
+  .setlist-date{ color:var(--gold); font-family:'JetBrains Mono', monospace; font-size:11px; }
+  .setlist-clear{
+    background:none; border:none; color:var(--ink-dim); font-size:12px; padding:3px 0;
+    text-decoration:underline; text-underline-offset:3px;
+  }
+  .setlist-add{ display:flex; gap:8px; margin-bottom:13px; }
+  .setlist-add input{
+    min-width:0; flex:1; background:rgba(18,33,29,0.82); border:1px solid var(--line);
+    color:var(--ink); border-radius:10px; padding:10px 12px; font-size:13px; outline:none;
+  }
+  .setlist-add input:focus{ border-color:var(--gold); }
+  .setlist-add button{
+    background:var(--gold); border:none; color:#1B2E27; border-radius:10px;
+    padding:0 14px; font-weight:700; font-size:13px; white-space:nowrap;
+  }
+  .setlist-add button:disabled{ opacity:0.45; cursor:not-allowed; }
+  .setlist-items{ display:flex; flex-direction:column; gap:7px; }
+  .setlist-item{
+    display:flex; align-items:center; gap:9px; background:rgba(18,33,29,0.58);
+    border:1px solid var(--line); border-radius:11px; padding:8px 9px;
+  }
+  .setlist-order{
+    width:25px; height:25px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; background:var(--gold-dim); color:var(--gold);
+    font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700;
+  }
+  .setlist-song{ min-width:0; flex:1; cursor:pointer; padding:2px 0; }
+  .setlist-song strong{
+    display:block; font-family:'Fraunces', serif; font-size:15px; line-height:1.2;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .setlist-song span{ display:block; color:var(--ink-dim); font-size:11px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .setlist-key{ font-family:'JetBrains Mono', monospace; color:var(--gold); font-size:11px; flex-shrink:0; }
+  .setlist-controls{ display:flex; gap:3px; flex-shrink:0; }
+  .setlist-control{
+    width:27px; height:27px; border-radius:7px; border:none; background:transparent;
+    color:var(--ink-dim); display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .setlist-control:hover{ background:var(--surface-alt); color:var(--ink); }
+  .setlist-control.remove:hover{ color:var(--danger); }
+  .setlist-control:disabled{ opacity:0.25; cursor:default; background:transparent; }
+  .setlist-empty{ color:var(--ink-dim); font-size:12.5px; line-height:1.5; padding:5px 2px 2px; }
+
+  /* ---------- Continuous set-list view ---------- */
+  .continuous-topbar{
+    position:sticky; top:0; z-index:20; margin:-8px -8px 24px; padding:8px;
+    background:linear-gradient(to bottom, rgba(18,33,29,0.99) 84%, rgba(18,33,29,0));
+  }
+  .continuous-topbar-row{ display:flex; align-items:center; gap:10px; }
+  .continuous-title{ min-width:0; flex:1; }
+  .continuous-title strong{ display:block; font-family:'Fraunces', serif; font-size:15px; }
+  .continuous-title span{ display:block; color:var(--gold); font-family:'JetBrains Mono', monospace; font-size:10px; margin-top:1px; }
+  .continuous-chord-toggle{
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-dim);
+    border-radius:10px; min-height:38px; padding:0 11px; font-size:12px; white-space:nowrap;
+  }
+  .continuous-chord-toggle.on{ color:var(--gold); border-color:var(--gold); background:var(--gold-dim); }
+  .continuous-intro{ margin-bottom:28px; }
+  .continuous-intro h1{ font-family:'Fraunces', serif; font-size:29px; margin:0 0 5px; }
+  .continuous-intro p{ color:var(--ink-dim); font-size:13px; line-height:1.5; margin:0; }
+  .set-song-page{ scroll-margin-top:72px; padding:4px 0 54px; margin-bottom:46px; border-bottom:1px solid var(--line); }
+  .set-song-page:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:20px; }
+  .set-song-position{
+    display:inline-flex; align-items:center; gap:7px; color:var(--gold);
+    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.07em;
+    text-transform:uppercase; margin-bottom:8px;
+  }
+  .set-song-position::before{ content:''; width:20px; height:1px; background:var(--gold); opacity:0.65; }
+  .set-song-next{ color:var(--ink-dim); font-size:12px; margin-top:34px; padding-top:13px; border-top:1px dashed var(--line); }
+  .set-song-next strong{ color:var(--gold); font-weight:600; }
+  .transition-card{
+    margin-top:38px; padding:16px 17px; border:1px solid rgba(212,175,106,0.3);
+    border-radius:var(--radius); background:linear-gradient(135deg, var(--gold-dim), rgba(27,46,39,0.72));
+  }
+  .transition-eyebrow{
+    color:var(--gold); font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;
+  }
+  .transition-sentence{ color:var(--ink-dim); font-size:12.5px; line-height:1.5; margin-bottom:10px; }
+  .transition-sentence strong{ color:var(--ink); font-weight:600; }
+  .transition-progression{
+    color:var(--gold); font-family:'JetBrains Mono', monospace; font-size:14px; font-weight:700;
+    line-height:1.8; overflow-x:auto; white-space:nowrap; padding-bottom:2px;
+  }
+  .transition-tip{ color:var(--ink-dim); font-size:10.5px; line-height:1.45; margin-top:8px; }
+
+  .setlist-header-actions{ display:flex; align-items:center; gap:9px; flex-shrink:0; }
+  .setlist-lock{
+    border:1px solid var(--line); background:rgba(18,33,29,0.64); color:var(--ink-dim);
+    border-radius:9px; min-height:31px; padding:0 10px; font-size:11px; font-weight:600;
+    display:flex; align-items:center; gap:5px;
+  }
+  .setlist-lock.locked{ color:var(--gold); border-color:rgba(212,175,106,0.5); background:var(--gold-dim); }
+  .setlist-locked-message{
+    color:var(--ink-dim); font-size:12px; line-height:1.5; padding:9px 11px; margin-bottom:12px;
+    background:rgba(18,33,29,0.5); border:1px dashed rgba(212,175,106,0.3); border-radius:10px;
+  }
+  .setlist-note-summary{ color:var(--gold) !important; font-size:10.5px !important; }
+  .setlist-note-btn.has-note{ color:var(--gold); background:var(--gold-dim); }
+  .rehearsal-note{
+    margin:0 0 18px; padding:13px 14px; border-left:3px solid var(--gold);
+    border-radius:0 10px 10px 0; background:var(--gold-dim);
+  }
+  .rehearsal-note-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .rehearsal-note-title{ color:var(--gold); font-family:'JetBrains Mono', monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; }
+  .rehearsal-note-edit{ background:none; border:none; color:var(--ink-dim); font-size:11px; text-decoration:underline; padding:0; }
+  .rehearsal-note-body{ color:var(--ink); font-size:13px; line-height:1.55; white-space:pre-wrap; }
+  .notes-textarea{
+    width:100%; min-height:150px; resize:vertical; background:var(--bg); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:12px; font-size:14px; line-height:1.5; outline:none;
+  }
+  .notes-textarea:focus{ border-color:var(--gold); }
+  .notes-actions{ display:flex; gap:10px; margin-top:14px; }
+
+  .set-overview{
+    display:flex; gap:6px; overflow-x:auto; padding:8px 0 3px; scrollbar-width:none;
+    scroll-behavior:smooth;
+  }
+  .set-overview::-webkit-scrollbar{ display:none; }
+  .set-overview-chip{
+    flex:0 0 auto; max-width:190px; border:1px solid var(--line); background:rgba(27,46,39,0.94);
+    color:var(--ink-dim); border-radius:999px; padding:6px 10px; font-size:11px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .set-overview-chip.active{ color:#1B2E27; background:var(--gold); border-color:var(--gold); font-weight:700; }
+  .set-overview-chip .num{ font-family:'JetBrains Mono', monospace; margin-right:4px; }
+
+  .song-jump-bar{
+    display:flex; align-items:center; gap:6px; overflow-x:auto; padding:2px 0 12px; margin-bottom:4px;
+    scrollbar-width:none;
+  }
+  .song-jump-bar::-webkit-scrollbar{ display:none; }
+  .song-jump-label{ color:var(--ink-dim); font-family:'JetBrains Mono', monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; flex-shrink:0; margin-right:2px; }
+  .song-jump-btn{
+    flex:0 0 auto; border:1px solid var(--line); background:var(--surface); color:var(--ink-dim);
+    border-radius:999px; padding:6px 10px; font-size:11px; white-space:nowrap;
+  }
+  .song-jump-btn:hover, .song-jump-btn:active{ color:var(--gold); border-color:var(--gold); background:var(--gold-dim); }
+  .song-jump-btn.next{ color:var(--gold); }
+  .section-label{ scroll-margin-top:138px; }
+
+  /* ---------- Library ---------- */
+  .song-list{ display:flex; flex-direction:column; gap:10px; }
+  .song-card{
+    background: var(--surface); border:1px solid var(--line); border-radius: var(--radius);
+    padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+    gap:12px;
+  }
+  .song-card:active{ background: var(--surface-alt); }
+  .song-card .info{ min-width:0; }
+  .song-card h3{
+    font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 3px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .song-card p{ margin:0; font-size:12.5px; color:var(--ink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .key-badge{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--gold);
+    background: var(--gold-dim); border-radius:7px; padding:4px 9px; flex-shrink:0;
+  }
+  .empty-state{ text-align:center; padding:60px 20px; color:var(--ink-dim); }
+  .empty-state svg{ opacity:0.4; margin-bottom:14px; }
+  .empty-state p{ font-size:14px; line-height:1.6; margin: 0 auto; max-width:280px; }
+
+  /* ---------- Song view ---------- */
+  .topbar{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .icon-btn{
+    background: var(--surface); border:1px solid var(--line); color: var(--ink);
+    border-radius:10px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .icon-btn:active{ background: var(--surface-alt); }
+  .icon-btn.danger{ color: var(--danger); }
+
+  .song-header{ margin-bottom:14px; }
+  .song-header h2{ font-family:'Fraunces', serif; font-weight:700; font-size:26px; margin:0 0 2px; }
+
+  .control-panel{
+    background: var(--surface); border:1px solid var(--line); border-radius: var(--radius);
+    padding:14px 16px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    flex-wrap: wrap;
+  }
+  .transpose-group{ display:flex; align-items:center; gap:10px; }
+  .transpose-btn{
+    background: var(--surface-alt); border:1px solid var(--line); color:var(--ink);
+    width:34px; height:34px; border-radius:9px; font-size:16px; font-weight:600; display:flex; align-items:center; justify-content:center;
+  }
+  .transpose-btn:active{ background: var(--gold-dim); }
+  .key-display{ font-family:'JetBrains Mono', monospace; text-align:center; min-width:88px; }
+  .key-display .k{ font-size:18px; color:var(--gold); font-weight:700; }
+  .key-display .orig{ font-size:10px; color:var(--ink-dim); display:block; margin-top:1px; }
+
+  .toggle-wrap{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-dim); }
+  .toggle{ width:42px; height:24px; border-radius:999px; background: var(--surface-alt); border:1px solid var(--line); position:relative; flex-shrink:0; }
+  .toggle .dot{ position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background: var(--ink-dim); transition: all 0.15s ease; }
+  .toggle.on{ background: var(--gold-dim); border-color: var(--gold); }
+  .toggle.on .dot{ transform: translateX(18px); background: var(--gold); }
+  .toggle-label-on{ color: var(--gold); }
+
+  /* ---------- Song body ---------- */
+  .song-body{ font-size:16px; line-height:1.6; }
+  .section-label{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em;
+    color: var(--gold); text-transform:uppercase; margin: 20px 0 6px; opacity:0.85;
+  }
+  .section-label:first-child{ margin-top:0; }
+  .lyric-line{ white-space:nowrap; overflow-x:auto; overflow-y:visible; padding:22px 0 6px; position:relative; }
+  .lyric-line::-webkit-scrollbar{ height:3px; }
+  .cl-unit{ position:relative; display:inline-block; vertical-align:bottom; }
+  .cl-unit .chord{
+    position:absolute; top:-20px; left:0; font-family:'JetBrains Mono', monospace;
+    font-size:13px; font-weight:700; color: var(--gold); white-space:nowrap; line-height:1;
+  }
+  .cl-unit .chord.tappable{ cursor:pointer; padding:1px 3px; margin-left:-3px; border-radius:5px; }
+  .cl-unit .chord.tappable:active{ background: var(--gold-dim); }
+  .cl-unit .lyric{ white-space:pre; }
+  .blank-line{ height:12px; }
+
+  /* ---------- Upload / edit form ---------- */
+  .form-field{ margin-bottom:16px; }
+  .form-field label{ display:block; font-size:12px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+  .form-field input, .form-field select, .form-field textarea{
+    width:100%; background: var(--surface); border:1px solid var(--line); color:var(--ink);
+    border-radius:10px; padding:11px 13px; font-size:14px; outline:none;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus{ border-color: var(--gold); }
+  .form-field textarea{ font-family:'JetBrains Mono', monospace; font-size:13.5px; line-height:1.7; min-height:220px; resize:vertical; }
+  .form-hint{ font-size:12px; color:var(--ink-dim); margin-top:7px; line-height:1.5; }
+  .form-hint code{ background: var(--surface-alt); padding:1px 5px; border-radius:4px; color:var(--gold); }
+  .form-actions{ display:flex; gap:10px; margin-top:22px; }
+  .btn-secondary{
+    background: var(--surface); border:1px solid var(--line); color:var(--ink);
+    border-radius:999px; padding:12px 20px; font-size:14px; flex:1;
+  }
+  .btn-primary{
+    background: var(--gold); border:none; color:#1B2E27; font-weight:700;
+    border-radius:999px; padding:12px 20px; font-size:14px; flex:2;
+  }
+
+  /* ---------- Chord popover (bottom sheet) ---------- */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(6,12,10,0.6); backdrop-filter:blur(2px);
+    display:flex; align-items:flex-end; justify-content:center; z-index:50;
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+  .sheet{
+    background: var(--surface); border:1px solid var(--line); border-bottom:none;
+    border-radius: 20px 20px 0 0; width:100%; max-width:720px; padding:22px 22px 30px;
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp{ from{ transform: translateY(30px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
+  .sheet-handle{ width:36px; height:4px; background:var(--line); border-radius:2px; margin:0 auto 18px; }
+  .sheet-title{ font-family:'Fraunces', serif; font-weight:700; font-size:28px; text-align:center; color:var(--gold); margin-bottom:2px; }
+  .sheet-sub{ text-align:center; font-size:12px; color:var(--ink-dim); margin-bottom:18px; font-family:'JetBrains Mono', monospace; }
+  .diagram-row{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+  .diagram-col{ text-align:center; }
+  .diagram-col .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-dim); margin-bottom:8px; }
+  .no-diagram{ font-size:13px; color:var(--ink-dim); padding:20px; text-align:center; max-width:260px; }
+  .sheet-close{
+    display:block; margin:22px auto 0; background:none; border:none; color:var(--ink-dim);
+    font-size:13px; text-decoration:underline;
+  }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* ============================= DATA / MUSIC THEORY ============================= */
+
+const NOTE_INDEX = {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11};
+const PREFERRED_NAME = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const ALL_KEYS = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+
+const QUALITY_MAP = [
+  ['maj7','maj7'],['maj9','maj7'],['m7b5','m7b5'],['min7','m7'],['sus2','sus2'],['sus4','sus4'],['add9','add9'],['dim7','dim7'],
+  ['min','min'],['dim','dim'],['aug','aug'],['maj','maj'],
+  ['m9','m9'],['m6','m6'],['m7','m7'],
+  ['6','6'],['9','9'],['7','7'],['2','sus2'],
+  ['m','min'],
+  ['','maj']
+];
+
+const INTERVALS = {
+  maj:[0,4,7], min:[0,3,7], '7':[0,4,7,10], maj7:[0,4,7,11], m7:[0,3,7,10],
+  m6:[0,3,7,9], m9:[0,3,7,10,2], m7b5:[0,3,6,10], sus2:[0,2,7], sus4:[0,5,7],
+  dim:[0,3,6], dim7:[0,3,6,9], aug:[0,4,8], '6':[0,4,7,9], '9':[0,4,7,10,2],
+  '11':[0,4,7,10,2,5], '13':[0,4,7,10,2,9], add9:[0,4,7,2]
+};
+
+const QUALITY_LABEL = {
+  maj:'', min:'m', '7':'7', maj7:'maj7', m7:'m7', m6:'m6', m9:'m9', m7b5:'m7\u266d5',
+  sus2:'sus2', sus4:'sus4', dim:'dim', dim7:'dim7', aug:'aug', '6':'6', '9':'9', '11':'11', '13':'13', add9:'add9'
+};
+
+
+function normalizeQuality(raw){
+  const lower = (raw || '').trim().toLowerCase();
+  for(const [key, norm] of QUALITY_MAP){
+    if(key !== '' && lower.startsWith(key)) return norm;
+  }
+  return 'maj';
+}
+
+function parseChordSymbol(sym){
+  const normalized = String(sym || '')
+    .trim()
+    .replace(/♯/g, '#')
+    .replace(/♭/g, 'b');
+
+  const match = normalized.match(/^([A-G])([#b]?)([^\/]*)(?:\/([A-G][#b]?))?$/);
+  if(!match) return null;
+
+  const rootName = match[1] + (match[2] || '');
+  const rootIdx = NOTE_INDEX[rootName];
+  if(rootIdx === undefined) return null;
+
+  const norm = normalizeQuality(match[3] || '');
+  const bassIdx = match[4] ? NOTE_INDEX[match[4]] : null;
+  return { rootIdx, norm, bassIdx, raw: normalized };
+}
+
+function formatChordSymbol(rootIdx, norm, bassIdx){
+  const normalizedRoot = ((rootIdx % 12) + 12) % 12;
+  let symbol = PREFERRED_NAME[normalizedRoot] +
+    (QUALITY_LABEL[norm] !== undefined ? QUALITY_LABEL[norm] : '');
+
+  if(bassIdx !== null && bassIdx !== undefined){
+    const normalizedBass = ((bassIdx % 12) + 12) % 12;
+    symbol += '/' + PREFERRED_NAME[normalizedBass];
+  }
+  return symbol;
+}
+
+function transposeChordSymbol(sym, semitones){
+  const parsed = parseChordSymbol(sym);
+  if(!parsed) return sym;
+
+  const newRoot = ((parsed.rootIdx + semitones) % 12 + 12) % 12;
+  const newBass = parsed.bassIdx !== null && parsed.bassIdx !== undefined
+    ? ((parsed.bassIdx + semitones) % 12 + 12) % 12
+    : null;
+
+  return formatChordSymbol(newRoot, parsed.norm, newBass);
+}
+
+function transposeKeyName(keyName, semitones){
+  const normalized = String(keyName || '').replace(/♯/g, '#').replace(/♭/g, 'b');
+  const idx = NOTE_INDEX[normalized];
+  if(idx === undefined) return keyName;
+  return PREFERRED_NAME[((idx + semitones) % 12 + 12) % 12];
+}
+
+/* ---------- Set-list key transitions ---------- */
+// Two-measure transition patterns supplied in the Continuity in Worship chart.
+// Each template starts in C; it is transposed to the displayed key of the outgoing song.
+const TRANSITION_TEMPLATES_FROM_C = {
+  1: 'C / / / Ab/C Bbm Ab7 / Db',
+  2: 'C / / / Em / Asus A D',
+  3: 'C / / / Ab/C / Bb/D / Eb',
+  4: 'C / / / D / B/D# / E',
+  5: 'C / / / Bb/D / C/E / F',
+  6: 'C / / C/E Cb/Eb / Db/F / Gb',
+  7: 'C / Am7 / D / / D/F# G',
+  8: 'C / / Csus Db/F / Eb/G / Ab',
+  9: 'C / / C/E D/F# / E/G# / A',
+  10: 'C / / / Eb/C / F / Bb',
+  11: 'C / / / C#m7 / F#sus F#7 B'
+};
+
+// Exact additional starting-key tables from the supplied chart. Using these directly
+// preserves its practical enharmonic spellings instead of producing theoretical double accidentals.
+const TRANSITION_TEMPLATES_BY_START = {
+  C: TRANSITION_TEMPLATES_FROM_C,
+  A: {
+    1:'A / / / F/A Gm F7 / Bb',
+    2:'A / / / C#m / F#sus F# B',
+    3:'A / / / F/A / G/B / C',
+    4:'A / / / B / Ab/C / Db',
+    5:'A / / / G/B / A/C# / D',
+    6:'A / / A/C# Ab/C / Bb/D / Eb',
+    7:'A / F#m7 / B / / B/D# E',
+    8:'A / / Asus Bb/D / C/E / F',
+    9:'A / / A/C# B/Eb / Db/F / Gb',
+    10:'A / / / C/A / D / G',
+    11:'A / / / Bbm7 / Ebsus Eb7 Ab'
+  },
+  G: {
+    1:'G / / / Eb/G Fm Eb7 / Ab',
+    2:'G / / / Bm / Esus E A',
+    3:'G / / / Eb/G / F/A / Bb',
+    4:'G / / / A / F#/A# / B',
+    5:'G / / / F/A / G/B / C',
+    6:'G / / G/B Gb/Bb / Ab/C / Db',
+    7:'G / Em7 / A / / A/C# D',
+    8:'G / / Gsus Ab/C / Bb/D / Eb',
+    9:'G / / G/B A/C# / B/D# / E',
+    10:'G / / / Bb/G / C / F',
+    11:'G / / / Abm7 / Dbsus Db7 Gb'
+  },
+  E: {
+    1:'E / / / C/E Dm C7 / F',
+    2:'E / / / Abm / Dbsus Db Gb',
+    3:'E / / / C/E / D/F# / G',
+    4:'E / / / Gb / Eb/G / Ab',
+    5:'E / / / D/F# / E/G# / A',
+    6:'E / / E/G# Eb/G / F/A / Bb',
+    7:'E / C#m7 / F# / / F#/A# B',
+    8:'E / / Esus F/A / G/B / C',
+    9:'E / / E/G# Gb/Bb / Ab/C / Db',
+    10:'E / / / G/E / A / D',
+    11:'E / / / Fm7 / Bbsus Bb7 Eb'
+  },
+  D: {
+    1:'D / / / Bb/D Cm Bb7 / Eb',
+    2:'D / / / F#m / Bsus B E',
+    3:'D / / / Bb/D / C/E / F',
+    4:'D / / / E / Db/F / Gb',
+    5:'D / / / C/E / D/F# / G',
+    6:'D / / D/F# Db/F / Eb/G / Ab',
+    7:'D / Bm7 / E / / E/G# A',
+    8:'D / / Dsus Eb/G / F/A / Bb',
+    9:'D / / D/F# E/G# / F#/A# / B',
+    10:'D / / / F/D / G / C',
+    11:'D / / / Ebm7 / Absus Ab7 Db'
+  }
+};
+
+const TRANSITION_LETTERS = ['C','D','E','F','G','A','B'];
+const NATURAL_NOTE_INDEX = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const SHARP_NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT_NOTE_NAMES = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+function transitionNoteIndex(note){
+  const match = String(note || '').match(/^([A-G])([#b]?)$/);
+  if(!match) return null;
+  const offset = match[2] === '#' ? 1 : (match[2] === 'b' ? -1 : 0);
+  return (NATURAL_NOTE_INDEX[match[1]] + offset + 12) % 12;
+}
+
+function simpleEnharmonicName(pc, destinationKey){
+  const flatKeys = new Set(['Db','Eb','F','Ab','Bb']);
+  return (flatKeys.has(destinationKey) ? FLAT_NOTE_NAMES : SHARP_NOTE_NAMES)[((pc%12)+12)%12];
+}
+
+function transposeTransitionNote(note, startKey){
+  if(startKey === 'C') return note;
+  const sourceMatch = String(note || '').match(/^([A-G])([#b]?)$/);
+  const startIdx = NOTE_INDEX[startKey];
+  if(!sourceMatch || startIdx === undefined) return note;
+
+  const sourceLetter = sourceMatch[1];
+  const sourcePc = transitionNoteIndex(note);
+  const diatonicShift = (TRANSITION_LETTERS.indexOf(startKey[0]) - TRANSITION_LETTERS.indexOf('C') + 7) % 7;
+  const newLetter = TRANSITION_LETTERS[(TRANSITION_LETTERS.indexOf(sourceLetter) + diatonicShift) % 7];
+  const targetPc = (sourcePc + startIdx) % 12;
+  let accidentalDistance = (targetPc - NATURAL_NOTE_INDEX[newLetter] + 12) % 12;
+  if(accidentalDistance > 6) accidentalDistance -= 12;
+
+  // Preserve sensible diatonic spellings, but avoid double sharps/flats in a volunteer-facing chart.
+  if(Math.abs(accidentalDistance) <= 1){
+    return newLetter + (accidentalDistance === 1 ? '#' : accidentalDistance === -1 ? 'b' : '');
+  }
+  return simpleEnharmonicName(targetPc, startKey);
+}
+
+function transposeTransitionChord(chord, startKey){
+  if(chord === '/') return chord;
+  const match = String(chord || '').match(/^([A-G][#b]?)([^\/]*)?(?:\/([A-G][#b]?))?$/);
+  if(!match) return chord;
+  const root = transposeTransitionNote(match[1], startKey);
+  const suffix = match[2] || '';
+  const bass = match[3] ? '/' + transposeTransitionNote(match[3], startKey) : '';
+  return root + suffix + bass;
+}
+
+function getTransitionSuggestion(fromKey, toKey){
+  const fromIdx = NOTE_INDEX[fromKey];
+  const toIdx = NOTE_INDEX[toKey];
+  if(fromIdx === undefined || toIdx === undefined) return null;
+
+  const interval = (toIdx - fromIdx + 12) % 12;
+  if(interval === 0){
+    return {
+      sameKey:true,
+      interval:0,
+      progression:`${fromKey} / / / ${fromKey} / / /`
+    };
+  }
+
+  const exactTemplate = TRANSITION_TEMPLATES_BY_START[fromKey]?.[interval];
+  const template = exactTemplate || TRANSITION_TEMPLATES_FROM_C[interval];
+  if(!template) return null;
+  const tokens = exactTemplate
+    ? template.split(/\s+/)
+    : template.split(/\s+/).map(token => transposeTransitionChord(token, fromKey));
+  // The source chart sometimes uses an enharmonic name (for example Gb) while
+  // the app's key selector uses the equivalent sharp name (F#). End on the exact selected key.
+  tokens[tokens.length - 1] = toKey;
+  return {
+    sameKey:false,
+    interval,
+    progression:tokens.join(' ')
+  };
+}
+
+function renderTransitionCard(fromKey, toKey, nextSongTitle){
+  const suggestion = getTransitionSuggestion(fromKey, toKey);
+  if(!suggestion) return '';
+
+  const sentence = suggestion.sameKey
+    ? `Both songs are in <strong>${escapeHtml(fromKey)}</strong>. Hold the tonic through the transition into <strong>${escapeHtml(nextSongTitle)}</strong>.`
+    : `To move from <strong>${escapeHtml(fromKey)}</strong> into <strong>${escapeHtml(toKey)}</strong> for <strong>${escapeHtml(nextSongTitle)}</strong>, try this suggested two-measure transition:`;
+
+  return `
+    <aside class="transition-card" aria-label="Suggested transition from ${escapeAttr(fromKey)} to ${escapeAttr(toKey)}">
+      <div class="transition-eyebrow">Transition to the next song</div>
+      <div class="transition-sentence">${sentence}</div>
+      <div class="transition-progression">${escapeHtml(suggestion.progression)}</div>
+      <div class="transition-tip">Slashes mean keep time without changing chord. Treat this as a starting point and adjust for tempo, ending chord, and arrangement.</div>
+    </aside>`;
+}
+
+// Standard guitar voicings. String order low-to-high: [E, A, D, G, B, e].
+// Frets are absolute; 0 = open and "x" = muted. Finger numbers follow the
+// standard convention: 1 index, 2 middle, 3 ring, 4 pinky.
+function guitarShape(frets, fingers, barres = []){
+  return { frets, fingers, barres };
+}
+
+const GUITAR_OPEN_SHAPES = {
+  // Major
+  '0_maj':  guitarShape(['x',3,2,0,1,0], ['x',3,2,0,1,0]),                  // C
+  '2_maj':  guitarShape(['x','x',0,2,3,2], ['x','x',0,1,3,2]),              // D
+  '4_maj':  guitarShape([0,2,2,1,0,0], [0,2,3,1,0,0]),                      // E
+  '5_maj':  guitarShape([1,3,3,2,1,1], [1,3,4,2,1,1], [{fret:1,from:0,to:5,finger:1}]), // F
+  '7_maj':  guitarShape([3,2,0,0,3,3], [2,1,0,0,3,4]),                      // G
+  '9_maj':  guitarShape(['x',0,2,2,2,0], ['x',0,1,2,3,0]),                  // A
+
+  // Minor
+  '2_min':  guitarShape(['x','x',0,2,3,1], ['x','x',0,2,3,1]),              // Dm
+  '4_min':  guitarShape([0,2,2,0,0,0], [0,2,3,0,0,0]),                      // Em
+  '9_min':  guitarShape(['x',0,2,2,1,0], ['x',0,2,3,1,0]),                  // Am
+
+  // Dominant seventh
+  '0_7':    guitarShape(['x',3,2,3,1,0], ['x',3,2,4,1,0]),                  // C7
+  '2_7':    guitarShape(['x','x',0,2,1,2], ['x','x',0,2,1,3]),              // D7
+  '4_7':    guitarShape([0,2,0,1,0,0], [0,2,0,1,0,0]),                      // E7
+  '5_7':    guitarShape([1,3,1,2,1,1], [1,3,1,2,1,1], [{fret:1,from:0,to:5,finger:1}]), // F7
+  '7_7':    guitarShape([3,2,0,0,0,1], [3,2,0,0,0,1]),                      // G7
+  '9_7':    guitarShape(['x',0,2,0,2,0], ['x',0,2,0,3,0]),                  // A7
+  '11_7':   guitarShape(['x',2,1,2,0,2], ['x',2,1,3,0,4]),                  // B7
+
+  // Major seventh
+  '0_maj7': guitarShape(['x',3,2,0,0,0], ['x',3,2,0,0,0]),                  // Cmaj7
+  '2_maj7': guitarShape(['x','x',0,2,2,2], ['x','x',0,1,2,3]),              // Dmaj7
+  '4_maj7': guitarShape([0,2,1,1,0,0], [0,3,1,2,0,0]),                      // Emaj7
+  '5_maj7': guitarShape(['x','x',3,2,1,0], ['x','x',3,2,1,0]),              // Fmaj7
+  '7_maj7': guitarShape([3,2,0,0,0,2], [3,2,0,0,0,1]),                      // Gmaj7
+  '9_maj7': guitarShape(['x',0,2,1,2,0], ['x',0,2,1,3,0]),                  // Amaj7
+
+  // Minor seventh
+  '2_m7':   guitarShape(['x','x',0,2,1,1], ['x','x',0,2,1,1], [{fret:1,from:4,to:5,finger:1}]), // Dm7
+  '4_m7':   guitarShape([0,2,0,0,0,0], [0,2,0,0,0,0]),                      // Em7
+  '9_m7':   guitarShape(['x',0,2,0,1,0], ['x',0,2,0,1,0]),                  // Am7
+
+  // Suspended and add chords commonly used in worship charts
+  '0_sus2': guitarShape(['x',3,0,0,3,3], ['x',2,0,0,3,4]),                  // Csus2
+  '2_sus2': guitarShape(['x','x',0,2,3,0], ['x','x',0,1,3,0]),              // Dsus2
+  '4_sus2': guitarShape([0,2,4,4,0,0], [0,1,3,4,0,0]),                      // Esus2
+  '7_sus2': guitarShape([3,0,0,0,3,3], [2,0,0,0,3,4]),                      // Gsus2
+  '9_sus2': guitarShape(['x',0,2,2,0,0], ['x',0,1,2,0,0]),                  // Asus2
+
+  '0_sus4': guitarShape(['x',3,3,0,1,1], ['x',3,4,0,1,1], [{fret:1,from:4,to:5,finger:1}]), // Csus4
+  '2_sus4': guitarShape(['x','x',0,2,3,3], ['x','x',0,1,3,4]),              // Dsus4
+  '4_sus4': guitarShape([0,2,2,2,0,0], [0,2,3,4,0,0]),                      // Esus4
+  '7_sus4': guitarShape([3,3,0,0,1,3], [2,3,0,0,1,4]),                      // Gsus4
+  '9_sus4': guitarShape(['x',0,2,2,3,0], ['x',0,1,2,3,0]),                  // Asus4
+
+  '0_add9': guitarShape(['x',3,2,0,3,3], ['x',3,2,0,4,4]),                  // Cadd9
+  '2_add9': guitarShape(['x','x',0,2,3,0], ['x','x',0,1,3,0]),              // Dadd9
+  '4_add9': guitarShape([0,2,4,1,0,2], [0,1,4,2,0,3]),                      // Eadd9
+  '7_add9': guitarShape([3,0,0,2,0,3], [2,0,0,1,0,3]),                      // Gadd9
+  '9_add9': guitarShape(['x',0,2,4,2,0], ['x',0,1,4,2,0]),                  // Aadd9
+
+  // Sixth chords
+  '0_6':    guitarShape(['x',3,2,2,1,0], ['x',3,2,2,1,0]),                  // C6
+  '2_6':    guitarShape(['x','x',0,2,0,2], ['x','x',0,1,0,2]),              // D6
+  '4_6':    guitarShape([0,2,2,1,2,0], [0,2,3,1,4,0]),                      // E6
+  '7_6':    guitarShape([3,2,0,0,0,0], [3,2,0,0,0,0]),                      // G6
+  '9_6':    guitarShape(['x',0,2,2,2,2], ['x',0,1,1,1,1], [{fret:2,from:2,to:5,finger:1}]) // A6
+};
+
+// Common slash-chord voicings. These are used only when the requested bass note
+// has a clear standard shape; otherwise the normal chord shape is shown.
+const GUITAR_SLASH_SHAPES = {
+  '0_maj_4': guitarShape([0,3,2,0,1,0], [0,3,2,0,1,0]),                     // C/E
+  '0_maj_7': guitarShape([3,3,2,0,1,0], [3,4,2,0,1,0]),                     // C/G
+  '2_maj_6': guitarShape([2,0,0,2,3,2], [1,0,0,2,4,3]),                     // D/F#
+  '2_maj_9': guitarShape(['x',0,0,2,3,2], ['x',0,0,1,3,2]),                 // D/A
+  '4_maj_8': guitarShape([4,2,2,1,0,0], [4,2,3,1,0,0]),                     // E/G#
+  '5_maj_9': guitarShape(['x',0,3,2,1,1], ['x',0,3,2,1,1], [{fret:1,from:4,to:5,finger:1}]), // F/A
+  '7_maj_11':guitarShape(['x',2,0,0,3,3], ['x',1,0,0,3,4]),                 // G/B
+  '9_maj_1': guitarShape(['x',4,2,2,2,0], ['x',4,1,2,3,0]),                 // A/C#
+  '9_min_0': guitarShape(['x',3,2,2,1,0], ['x',3,2,4,1,0]),                 // Am/C
+  '4_min_7': guitarShape([3,2,2,0,0,0], [3,1,2,0,0,0]),                     // Em/G
+  '2_min_5': guitarShape([1,'x',0,2,3,1], [1,'x',0,2,4,1], [{fret:1,from:0,to:5,finger:1}]) // Dm/F
+};
+
+// Movable E- and A-family barre shapes. These provide real playable voicings for
+// chromatic roots while the open-shape table above keeps common chords familiar.
+const GUITAR_MOVABLE_SHAPES = {
+  maj: [
+    {base:4, offsets:[0,2,2,1,0,0], fingers:[1,3,4,2,1,1], barre:{from:0,to:5}},
+    {base:9, offsets:['x',0,2,2,2,0], fingers:['x',1,3,3,3,1], barre:{from:1,to:5}}
+  ],
+  min: [
+    {base:4, offsets:[0,2,2,0,0,0], fingers:[1,3,4,1,1,1], barre:{from:0,to:5}},
+    {base:9, offsets:['x',0,2,2,1,0], fingers:['x',1,3,4,2,1], barre:{from:1,to:5}}
+  ],
+  '7': [
+    {base:4, offsets:[0,2,0,1,0,0], fingers:[1,3,1,2,1,1], barre:{from:0,to:5}},
+    {base:9, offsets:['x',0,2,0,2,0], fingers:['x',1,3,1,4,1], barre:{from:1,to:5}}
+  ],
+  maj7: [
+    {base:4, offsets:[0,2,1,1,0,0], fingers:[1,4,2,3,1,1], barre:{from:0,to:5}},
+    {base:9, offsets:['x',0,2,1,2,0], fingers:['x',1,3,2,4,1], barre:{from:1,to:5}}
+  ],
+  m7: [
+    {base:4, offsets:[0,2,0,0,0,0], fingers:[1,3,1,1,1,1], barre:{from:0,to:5}},
+    {base:9, offsets:['x',0,2,0,1,0], fingers:['x',1,3,1,2,1], barre:{from:1,to:5}}
+  ],
+  sus2: [
+    {base:9, offsets:['x',0,2,2,0,0], fingers:['x',1,3,4,1,1], barre:{from:1,to:5}}
+  ],
+  sus4: [
+    {base:4, offsets:[0,2,2,2,0,0], fingers:[1,2,3,4,1,1], barre:{from:0,to:5}},
+    {base:9, offsets:['x',0,2,2,3,0], fingers:['x',1,2,3,4,1], barre:{from:1,to:5}}
+  ]
+};
+
+function buildMovableShape(template, rootIdx){
+  const rootFret = ((rootIdx - template.base) % 12 + 12) % 12;
+  const frets = template.offsets.map(offset => offset === 'x' ? 'x' : rootFret + offset);
+  const barres = rootFret > 0 && template.barre
+    ? [{fret:rootFret, from:template.barre.from, to:template.barre.to, finger:1}]
+    : [];
+  return guitarShape(frets, template.fingers.slice(), barres);
+}
+
+function getGuitarShape(rootIdx, norm, bassIdx = null){
+  if(bassIdx !== null && bassIdx !== undefined){
+    const slashKey = `${rootIdx}_${norm}_${bassIdx}`;
+    if(GUITAR_SLASH_SHAPES[slashKey]) return GUITAR_SLASH_SHAPES[slashKey];
+  }
+
+  const openKey = `${rootIdx}_${norm}`;
+  if(GUITAR_OPEN_SHAPES[openKey]) return GUITAR_OPEN_SHAPES[openKey];
+
+  const templates = GUITAR_MOVABLE_SHAPES[norm];
+  if(!templates) return null;
+
+  const candidates = templates.map(template => {
+    const shape = buildMovableShape(template, rootIdx);
+    const positive = shape.frets.filter(f => typeof f === 'number' && f > 0);
+    const min = positive.length ? Math.min(...positive) : 0;
+    const max = positive.length ? Math.max(...positive) : 0;
+    return {shape, score:min * 10 + max};
+  });
+  candidates.sort((a,b) => a.score - b.score);
+  return candidates[0].shape;
+}
+
+function renderGuitarSVG(rootIdx, norm, bassIdx = null){
+  const shape = getGuitarShape(rootIdx, norm, bassIdx);
+  if(!shape) return null;
+
+  const frets = shape.frets;
+  const fingers = shape.fingers || [];
+  const positiveFrets = frets.filter(f => typeof f === 'number' && f > 0);
+  const minFret = positiveFrets.length ? Math.min(...positiveFrets) : 1;
+  const maxFret = positiveFrets.length ? Math.max(...positiveFrets) : 4;
+  const hasOpenStrings = frets.some(f => f === 0);
+  const startFret = hasOpenStrings || minFret === 1 ? 0 : minFret;
+  const numFrets = Math.max(4, Math.min(5, maxFret - (startFret || 1) + 1));
+
+  const W=160, H=205, left=28, right=16, top=34, bottom=31;
+  const stringGap=(W-left-right)/5;
+  const fretGap=(H-top-bottom)/numFrets;
+  const stringNames=['E','A','D','G','B','e'];
+
+  const fretCenterY = fret => {
+    const row = startFret === 0 ? fret - 1 : fret - startFret;
+    return top + row * fretGap + fretGap / 2;
+  };
+
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Guitar chord fingering">`;
+
+  if(startFret===0){
+    svg += `<rect x="${left}" y="${top-1}" width="${W-left-right}" height="4" rx="2" fill="#EDE6D6"/>`;
+  } else {
+    svg += `<text x="${left-6}" y="${top+13}" font-size="10" fill="#A9B8AE" text-anchor="end" font-family="JetBrains Mono, monospace">${startFret}fr</text>`;
+  }
+
+  for(let row=0; row<=numFrets; row++){
+    const y=top+row*fretGap;
+    if(startFret===0 && row===0) continue;
+    svg += `<line x1="${left}" y1="${y}" x2="${W-right}" y2="${y}" stroke="rgba(237,230,214,0.28)" stroke-width="1.5"/>`;
+  }
+
+  for(let string=0; string<6; string++){
+    const x=left+string*stringGap;
+    svg += `<line x1="${x}" y1="${top}" x2="${x}" y2="${H-bottom}" stroke="rgba(237,230,214,0.42)" stroke-width="1.5"/>`;
+    svg += `<text x="${x}" y="${H-9}" font-size="9" fill="#A9B8AE" text-anchor="middle" font-family="JetBrains Mono, monospace">${stringNames[string]}</text>`;
+  }
+
+  frets.forEach((f,string) => {
+    const x=left+string*stringGap;
+    if(f==='x'){
+      svg += `<text x="${x}" y="${top-10}" font-size="12" fill="#C1666B" text-anchor="middle" font-family="JetBrains Mono, monospace">×</text>`;
+    } else if(f===0){
+      svg += `<circle cx="${x}" cy="${top-14}" r="4.5" fill="none" stroke="#A9B8AE" stroke-width="1.5"/>`;
+    }
+  });
+
+  // Draw barre indicators first, behind the individual finger dots.
+  (shape.barres || []).forEach(barre => {
+    if(barre.fret <= 0) return;
+    const y=fretCenterY(barre.fret);
+    const x1=left+barre.from*stringGap;
+    const x2=left+barre.to*stringGap;
+    svg += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#D4AF6A" stroke-width="14" stroke-linecap="round"/>`;
+    svg += `<text x="${(x1+x2)/2}" y="${y+3.5}" font-size="9" font-weight="700" fill="#1B2E27" text-anchor="middle" font-family="Inter, sans-serif">${barre.finger || 1}</text>`;
+  });
+
+  frets.forEach((f,string) => {
+    if(typeof f !== 'number' || f <= 0) return;
+    const finger=fingers[string];
+    const representedByBarre=(shape.barres || []).some(barre =>
+      barre.fret===f && string>=barre.from && string<=barre.to && (barre.finger || 1)===finger
+    );
+    if(representedByBarre) return;
+
+    const x=left+string*stringGap;
+    const y=fretCenterY(f);
+    svg += `<circle cx="${x}" cy="${y}" r="8" fill="#D4AF6A" stroke="#1B2E27" stroke-width="1.2"/>`;
+    if(finger && finger !== 0){
+      svg += `<text x="${x}" y="${y+3.5}" font-size="9" font-weight="700" fill="#1B2E27" text-anchor="middle" font-family="Inter, sans-serif">${finger}</text>`;
+    }
+  });
+
+  svg += `</svg>`;
+  return svg;
+}
+
+/* ---------- Piano diagram: one octave, each chord tone shown once ---------- */
+function renderPianoSVG(rootIdx, norm, bassIdx = null){
+  const intervals = INTERVALS[norm] || [0,4,7];
+  const pcs = new Set(intervals.map(iv => ((rootIdx+iv)%12+12)%12));
+  const whiteNotes = [0,2,4,5,7,9,11];
+  const blackDefs = [{i:0,pc:1},{i:1,pc:3},{i:3,pc:6},{i:4,pc:8},{i:5,pc:10}];
+  const W=196, H=112, whiteW=W/7, blackW=whiteW*0.62, blackH=H*0.62;
+
+  const whiteFill = pc => {
+    if(pc===rootIdx) return '#D4AF6A';
+    if(pcs.has(pc)) return 'rgba(212,175,106,0.42)';
+    return '#EDE6D6';
+  };
+  const blackFill = pc => {
+    if(pc===rootIdx) return '#D4AF6A';
+    if(pcs.has(pc)) return '#4a6358';
+    return '#12211D';
+  };
+
+  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One octave piano chord diagram">`;
+  whiteNotes.forEach((pc,i) => {
+    const bassStroke = bassIdx===pc && bassIdx!==rootIdx ? '#C1666B' : 'rgba(18,33,29,0.5)';
+    const bassWidth = bassIdx===pc && bassIdx!==rootIdx ? 3 : 1;
+    svg += `<rect x="${i*whiteW}" y="0" width="${whiteW-1}" height="${H}" rx="2" fill="${whiteFill(pc)}" stroke="${bassStroke}" stroke-width="${bassWidth}"/>`;
+  });
+  blackDefs.forEach(({i,pc}) => {
+    const x=(i+1)*whiteW-blackW/2;
+    const bassStroke = bassIdx===pc && bassIdx!==rootIdx ? '#C1666B' : 'none';
+    const bassWidth = bassIdx===pc && bassIdx!==rootIdx ? 3 : 0;
+    svg += `<rect x="${x}" y="0" width="${blackW}" height="${blackH}" rx="2" fill="${blackFill(pc)}" stroke="${bassStroke}" stroke-width="${bassWidth}"/>`;
+  });
+  svg += `</svg>`;
+  return svg;
+}
+
+/* ============================= SONG BODY PARSING ============================= */
+
+function parseLineTokens(line){
+  const regex = /\[([^\]]+)\]/g;
+  const tokens = [];
+  let lastIndex = 0, m;
+  let sawChord = false;
+  while((m = regex.exec(line)) !== null){
+    if(!sawChord && m.index > 0){ tokens.push({chord:null, text: line.slice(0, m.index)}); }
+    sawChord = true;
+    const chord = m[1];
+    const nextIdx = regex.lastIndex;
+    const rest = line.slice(nextIdx);
+    const nextBracket = rest.indexOf('[');
+    const text = nextBracket === -1 ? rest : rest.slice(0, nextBracket);
+    tokens.push({chord, text});
+    lastIndex = nextIdx;
+  }
+  if(tokens.length===0){ tokens.push({chord:null, text: line}); }
+  return tokens;
+}
+
+function transposeBody(body, semitones){
+  if(!semitones) return body;
+  return body.split('\n').map(line=>{
+    return line.replace(/\[([^\]]+)\]/g, (whole, sym)=> `[${transposeChordSymbol(sym, semitones)}]`);
+  }).join('\n');
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escapeAttr(s){
+  return escapeHtml(s).replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function extractSongSections(body){
+  const sections = [];
+  String(body||'').split('\n').forEach(line=>{
+    const match = line.trim().match(/^\{(.+)\}$/);
+    if(match) sections.push(match[1].trim());
+  });
+  return sections;
+}
+
+function renderSongBodyHTML(body, chordModeOn, anchorPrefix=''){
+  const lines = body.split('\n');
+  let html = '';
+  let sectionIndex = 0;
+  lines.forEach(line=>{
+    const trimmed = line.trim();
+    if(trimmed===''){ html += `<div class="blank-line"></div>`; return; }
+    const sectionMatch = trimmed.match(/^\{(.+)\}$/);
+    if(sectionMatch){
+      const anchor = anchorPrefix ? ` id="section-${escapeAttr(anchorPrefix)}-${sectionIndex}"` : '';
+      html += `<div class="section-label"${anchor}>${escapeHtml(sectionMatch[1])}</div>`;
+      sectionIndex += 1;
+      return;
+    }
+    const tokens = parseLineTokens(line);
+    let lineHtml = `<div class="lyric-line">`;
+    tokens.forEach(tok=>{
+      const chordHtml = tok.chord
+        ? `<span class="chord${chordModeOn ? ' tappable' : ''}" ${chordModeOn ? `onclick="openChordSheet('${escapeHtml(tok.chord).replace(/'/g,"\\'")}')"` : ''}>${escapeHtml(tok.chord)}</span>`
+        : '';
+      const lyricText = tok.text === '' ? '\u00A0' : tok.text;
+      lineHtml += `<span class="cl-unit">${chordHtml}<span class="lyric">${escapeHtml(lyricText)}</span></span>`;
+    });
+    lineHtml += `</div>`;
+    html += lineHtml;
+  });
+  return html;
+}
+
+function renderSongJumpControls(song, nextSong){
+  const sections = extractSongSections(song.body);
+  if(sections.length===0 && !nextSong) return '';
+  const sectionButtons = sections.map((label,index)=>
+    `<button class="song-jump-btn" onclick="jumpToSongSection('${song.id}',${index})">${escapeHtml(label)}</button>`
+  ).join('');
+  const nextButton = nextSong
+    ? `<button class="song-jump-btn next" onclick="jumpToSetSong('${nextSong.id}')">Next song &rarr;</button>`
+    : '';
+  return `<div class="song-jump-bar"><span class="song-jump-label">Jump</span>${sectionButtons}${nextButton}</div>`;
+}
+
+/* ============================= STORAGE ============================= */
+
+const STORAGE_KEY = 'songs';
+const SETLIST_STORAGE_KEY = 'sundaySetlist';
+const SHARED = true;
+
+// Supabase is the primary shared database. This publishable key is intended
+// for browser use; access is still controlled by the table's RLS policies.
+const SUPABASE_URL = 'https://nwikupipvwgjzjburwia.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_cmxhMF5Y_iZ9yuP_3ELvhw_EGd3LMn8';
+const SUPABASE_TABLE = 'app_storage';
+
+let storageStatus = 'connecting'; // connecting | cloud | local
+let storageStatusDetail = '';
+
+function updateStorageStatus(mode, detail=''){
+  storageStatus = mode;
+  storageStatusDetail = detail;
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  el.textContent = mode === 'cloud' ? 'Cloud sync' : mode === 'local' ? 'Local backup' : 'Connecting…';
+  el.title = detail || (mode === 'cloud'
+    ? 'Songs and Sunday sets are syncing through Supabase.'
+    : mode === 'local'
+      ? 'Supabase is unavailable. Changes are saved only in this browser until cloud sync returns.'
+      : 'Connecting to Supabase…');
+  el.dataset.mode = mode;
+}
+
+function supabaseEndpoint(query=''){
+  return `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}${query}`;
+}
+
+async function readSupabaseValue(key){
+  const query = `?key=eq.${encodeURIComponent(key)}&select=value&limit=1`;
+  const response = await fetch(supabaseEndpoint(query), {
+    method: 'GET',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Accept: 'application/json'
+    },
+    cache: 'no-store'
+  });
+  if(!response.ok){
+    const message = await response.text();
+    throw new Error(`Supabase read failed (${response.status}): ${message}`);
+  }
+  const rows = await response.json();
+  updateStorageStatus('cloud');
+  return rows.length ? rows[0].value : null;
+}
+
+async function writeSupabaseValue(key, value){
+  const response = await fetch(supabaseEndpoint('?on_conflict=key'), {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify({ key, value })
+  });
+  if(!response.ok){
+    const message = await response.text();
+    throw new Error(`Supabase save failed (${response.status}): ${message}`);
+  }
+  updateStorageStatus('cloud');
+}
+
+async function readLegacyValue(key){
+  try{
+    if(window.storage && typeof window.storage.get === 'function'){
+      const result = await window.storage.get(key, SHARED);
+      if(result && result.value) return result.value;
+    }
+  }catch(error){
+    console.warn('Previous shared storage unavailable', error);
+  }
+
+  try{
+    return window.localStorage.getItem(key);
+  }catch(error){
+    console.warn('Browser storage unavailable', error);
+    return null;
+  }
+}
+
+async function writeBrowserBackup(key, value){
+  try{
+    window.localStorage.setItem(key, value);
+  }catch(error){
+    console.warn('Browser backup failed', error);
+  }
+
+  // Keep the former hosted-storage copy current when that API is available.
+  try{
+    if(window.storage && typeof window.storage.set === 'function'){
+      await window.storage.set(key, value, SHARED);
+    }
+  }catch(error){
+    console.warn('Previous shared-storage backup failed', error);
+  }
+}
+
+async function loadStorageValue(key){
+  try{
+    const cloudValue = await readSupabaseValue(key);
+    if(cloudValue !== null){
+      await writeBrowserBackup(key, cloudValue);
+      return cloudValue;
+    }
+  }catch(error){
+    console.warn(`Cloud load failed for ${key}`, error);
+    updateStorageStatus('local', error.message);
+  }
+
+  const legacyValue = await readLegacyValue(key);
+  if(legacyValue !== null){
+    // One-time migration: when Supabase has no row yet, copy the previous data
+    // into the cloud without requiring the user to re-enter the song library.
+    try{
+      await writeSupabaseValue(key, legacyValue);
+    }catch(error){
+      console.warn(`Cloud migration failed for ${key}`, error);
+      updateStorageStatus('local', error.message);
+    }
+    return legacyValue;
+  }
+  return null;
+}
+
+async function saveStorageValue(key, value){
+  let cloudError = null;
+  try{
+    await writeSupabaseValue(key, value);
+  }catch(error){
+    cloudError = error;
+    console.error(`Cloud save failed for ${key}`, error);
+    updateStorageStatus('local', error.message);
+  }
+
+  await writeBrowserBackup(key, value);
+  if(cloudError){
+    // Keep the app usable if the device is temporarily offline. A later save
+    // will write the complete current JSON back to Supabase.
+    return false;
+  }
+  return true;
+}
+
+const SAMPLE_SONGS = [{
+  id: 'sample-amazing-grace',
+  title: 'Amazing Grace',
+  key: 'G',
+  body: `{Verse 1}
+[G]Amazing [G7]grace, how [C]sweet the [G]sound
+That [G]saved a [Em]wretch like [D]me
+I [G]once was [G7]lost, but [C]now am [G]found
+Was [Em]blind but [D]now I [G]see
+
+{Verse 2}
+'Twas [G]grace that [G7]taught my [C]heart to [G]fear
+And [G]grace my [Em]fears re[D]lieved
+How [G]precious [G7]did that [C]grace ap[G]pear
+The [Em]hour I [D]first be[G]lieved`
+}];
+
+async function loadSongs(){
+  const serialized = await loadStorageValue(STORAGE_KEY);
+  if(serialized === null) return null;
+  try{
+    return JSON.parse(serialized);
+  }catch(error){
+    console.error('Stored song library is not valid JSON', error);
+    return null;
+  }
+}
+
+async function saveSongs(songs){
+  return saveStorageValue(STORAGE_KEY, JSON.stringify(songs));
+}
+
+
+function getUpcomingSunday(){
+  const date = new Date();
+  date.setHours(12,0,0,0);
+  const daysUntilSunday = (7 - date.getDay()) % 7;
+  date.setDate(date.getDate() + daysUntilSunday);
+  return date;
+}
+
+function localDateKey(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+
+function currentSundayDateKey(){ return localDateKey(getUpcomingSunday()); }
+
+function sundayDateLabel(){
+  return new Intl.DateTimeFormat(undefined, {
+    weekday:'long', month:'long', day:'numeric'
+  }).format(getUpcomingSunday());
+}
+
+async function loadSundaySetlist(){
+  let parsed = null;
+  const serialized = await loadStorageValue(SETLIST_STORAGE_KEY);
+  if(serialized !== null){
+    try{
+      parsed = JSON.parse(serialized);
+    }catch(error){
+      console.error('Stored Sunday set is not valid JSON', error);
+    }
+  }
+
+  const dateKey = currentSundayDateKey();
+  if(Array.isArray(parsed)) return { sundayDate:dateKey, songIds:parsed, notes:{}, locked:false };
+  if(!parsed || parsed.sundayDate !== dateKey || !Array.isArray(parsed.songIds)){
+    return { sundayDate:dateKey, songIds:[], notes:{}, locked:false };
+  }
+  return {
+    sundayDate: parsed.sundayDate,
+    songIds: parsed.songIds,
+    notes: parsed.notes && typeof parsed.notes === 'object' ? parsed.notes : {},
+    locked: Boolean(parsed.locked)
+  };
+}
+
+async function saveSundaySetlist(){
+  const payload = JSON.stringify({
+    sundayDate: currentSundayDateKey(),
+    songIds: state.sundaySetlist,
+    notes: state.setlistNotes,
+    locked: state.setlistLocked
+  });
+  return saveStorageValue(SETLIST_STORAGE_KEY, payload);
+}
+
+/* ============================= APP STATE ============================= */
+
+let state = {
+  view: 'library',       // library | song | setlist | form
+  songs: [],
+  sundaySetlist: [],
+  setlistNotes: {},
+  setlistLocked: false,
+  setlistTransposes: {},
+  setlistScrollTarget: null,
+  search: '',
+  currentSongId: null,
+  transpose: 0,
+  chordMode: false,
+  editingId: null,
+  formReturnView: 'library',
+  loading: true
+};
+
+function uid(){ return 's' + Date.now() + Math.random().toString(36).slice(2,7); }
+
+/* ============================= RENDER ============================= */
+
+const appEl = document.getElementById('app');
+
+function render(){
+  if(state.view !== 'setlist') teardownSetlistScrollTracking();
+  if(state.loading){
+    appEl.innerHTML = `<div class="app"><div class="empty-state"><p>Loading your song library&hellip;</p></div></div>`;
+    return;
+  }
+  if(state.view === 'library') return renderLibraryView();
+  if(state.view === 'song') return renderSongView();
+  if(state.view === 'setlist') return renderContinuousSetlistView();
+  if(state.view === 'form') return renderFormView();
+}
+
+function setlistOptionLabel(song){
+  return song.title;
+}
+
+function renderSundaySetlist(){
+  const setSongs = state.sundaySetlist
+    .map(id => state.songs.find(song => song.id === id))
+    .filter(Boolean);
+  const availableSongs = state.songs.filter(song => !state.sundaySetlist.includes(song.id));
+  const locked = state.setlistLocked;
+
+  const optionsHtml = availableSongs.map(song =>
+    `<option value="${escapeAttr(setlistOptionLabel(song))}"></option>`
+  ).join('');
+
+  const itemsHtml = setSongs.length ? setSongs.map((song,index)=>{
+    const note = (state.setlistNotes[song.id] || '').trim();
+    const controls = locked ? '' : `
+      <div class="setlist-controls">
+        <button class="setlist-control setlist-note-btn ${note?'has-note':''}" onclick="openSetlistNotes('${song.id}')" aria-label="${note?'Edit':'Add'} rehearsal note" title="${note?'Edit':'Add'} rehearsal note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v13H7l-3 3V4z"/><path d="M8 8h8M8 12h5"/></svg>
+        </button>
+        <button class="setlist-control" onclick="moveSetlistSong('${song.id}',-1)" ${index===0?'disabled':''} aria-label="Move up" title="Move up">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 15l-6-6-6 6"/></svg>
+        </button>
+        <button class="setlist-control" onclick="moveSetlistSong('${song.id}',1)" ${index===setSongs.length-1?'disabled':''} aria-label="Move down" title="Move down">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="setlist-control remove" onclick="removeFromSetlist('${song.id}')" aria-label="Remove from set list" title="Remove">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>`;
+    return `
+      <div class="setlist-item">
+        <div class="setlist-order">${index+1}</div>
+        <div class="setlist-song" onclick="openSetlistSong('${song.id}')" title="Open ${escapeAttr(song.title)} in the continuous set list">
+          <strong>${escapeHtml(song.title)}</strong>
+          ${note ? `<span class="setlist-note-summary">Rehearsal note: ${escapeHtml(note.replace(/\s+/g,' ').slice(0,70))}${note.replace(/\s+/g,' ').length>70?'…':''}</span>` : ''}
+        </div>
+        <div class="setlist-key">${escapeHtml(song.key || '?')}</div>
+        ${controls}
+      </div>`;
+  }).join('') : `<div class="setlist-empty">No songs have been added yet. Search the library above and add the songs planned for this Sunday.</div>`;
+
+  return `
+    <section class="setlist-section">
+      <div class="setlist-header">
+        <div class="setlist-heading">
+          <h2>This Sunday’s Set List</h2>
+          <div class="setlist-date">${escapeHtml(sundayDateLabel())}</div>
+        </div>
+        <div class="setlist-header-actions">
+          ${!locked && setSongs.length ? `<button class="setlist-clear" onclick="clearSundaySetlist()">Clear set</button>` : ''}
+          <button class="setlist-lock ${locked?'locked':''}" onclick="toggleSetlistLock()" title="${locked?'Unlock set for editing':'Lock this Sunday’s set'}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+            ${locked?'Locked':'Lock set'}
+          </button>
+        </div>
+      </div>
+      ${locked ? `<div class="setlist-locked-message">This set is locked. Songs, order, and rehearsal notes are protected until someone unlocks it.</div>` : `
+        <div class="setlist-add">
+          <input id="setlist-song-search" type="text" list="setlist-song-options"
+            placeholder="Search a song to add…" autocomplete="off"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); addSongFromSetlistSearch(); }">
+          <datalist id="setlist-song-options">${optionsHtml}</datalist>
+          <button onclick="addSongFromSetlistSearch()" ${availableSongs.length?'':'disabled'}>Add</button>
+        </div>`}
+      <div class="setlist-items">${itemsHtml}</div>
+    </section>`;
+}
+
+function renderLibrarySongResults(){
+  const query = state.search.trim().toLowerCase();
+  const filtered = state.songs.filter(song =>
+    !query || song.title.toLowerCase().includes(query)
+  );
+
+  if(state.songs.length===0){
+    return `<div class="empty-state">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#A9B8AE" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <p>Your chord library is empty. Tap "Add song" to upload your first chord sheet.</p>
+    </div>`;
+  }
+  if(filtered.length===0){
+    return `<div class="empty-state"><p>No songs match "${escapeHtml(state.search)}".</p></div>`;
+  }
+  return `<div class="song-list">` + filtered.map(song=>`
+    <div class="song-card" onclick="openSong('${song.id}')">
+      <div class="info">
+        <h3>${escapeHtml(song.title)}</h3>
+      </div>
+      <span class="key-badge">${escapeHtml(song.key || '?')}</span>
+    </div>
+  `).join('') + `</div>`;
+}
+
+function renderLibraryView(){
+  appEl.innerHTML = `
+    <div class="brand">
+      <h1>IPCOS <span class="amp">Chords</span></h1>
+      <span id="sync-status" class="tag" data-mode="${storageStatus}" title="${escapeAttr(storageStatusDetail || 'Connecting to Supabase…')}">${storageStatus === 'cloud' ? 'Cloud sync' : storageStatus === 'local' ? 'Local backup' : 'Connecting…'}</span>
+    </div>
+    ${renderSundaySetlist()}
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A9B8AE" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="library-search" type="text" placeholder="Search all songs…" value="${escapeAttr(state.search)}" oninput="onSearch(this.value)">
+      </div>
+      <button class="btn-gold" onclick="openForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B2E27" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add song
+      </button>
+    </div>
+    <div id="library-song-results">${renderLibrarySongResults()}</div>
+  `;
+}
+
+function renderContinuousSetlistView(){
+  const setSongs = state.sundaySetlist
+    .map(id => state.songs.find(song => song.id === id))
+    .filter(Boolean);
+
+  if(setSongs.length===0){
+    state.view = 'library';
+    render();
+    return;
+  }
+
+  const initialActiveId = state.setlistScrollTarget || setSongs[0].id;
+  const overviewHtml = setSongs.map((song,index)=>`
+    <button class="set-overview-chip ${song.id===initialActiveId?'active':''}" data-set-chip="${song.id}" onclick="jumpToSetSong('${song.id}')" title="Jump to ${escapeAttr(song.title)}">
+      <span class="num">${index+1}.</span>${escapeHtml(song.title)}
+    </button>`).join('');
+
+  const pagesHtml = setSongs.map((song,index)=>{
+    const semitones = state.setlistTransposes[song.id] || 0;
+    const transposedBody = transposeBody(song.body, semitones);
+    const displayKey = transposeKeyName(song.key || 'C', semitones);
+    const nextSong = setSongs[index+1];
+    const nextSemitones = nextSong ? (state.setlistTransposes[nextSong.id] || 0) : 0;
+    const nextDisplayKey = nextSong ? transposeKeyName(nextSong.key || 'C', nextSemitones) : null;
+    const note = (state.setlistNotes[song.id] || '').trim();
+    return `
+      <section class="set-song-page" id="set-song-${song.id}" data-set-song-id="${song.id}">
+        <div class="set-song-position">Song ${index+1} of ${setSongs.length}</div>
+        <div class="song-header">
+          <h2>${escapeHtml(song.title)}</h2>
+        </div>
+        ${note ? `<div class="rehearsal-note">
+          <div class="rehearsal-note-head">
+            <span class="rehearsal-note-title">Rehearsal note</span>
+            ${state.setlistLocked?'':`<button class="rehearsal-note-edit" onclick="openSetlistNotes('${song.id}')">Edit note</button>`}
+          </div>
+          <div class="rehearsal-note-body">${escapeHtml(note)}</div>
+        </div>` : ''}
+        <div class="control-panel">
+          <div class="transpose-group">
+            <button class="transpose-btn" onclick="changeSetlistTranspose('${song.id}',-1)">&minus;</button>
+            <div class="key-display">
+              <div class="k">${escapeHtml(displayKey)}</div>
+              <span class="orig">${semitones===0 ? 'original key' : 'orig. ' + escapeHtml(song.key||'C')}</span>
+            </div>
+            <button class="transpose-btn" onclick="changeSetlistTranspose('${song.id}',1)">&plus;</button>
+          </div>
+        </div>
+        ${renderSongJumpControls(song, nextSong)}
+        <div class="song-body">${renderSongBodyHTML(transposedBody, state.chordMode, song.id)}</div>
+        ${nextSong ? renderTransitionCard(displayKey, nextDisplayKey, nextSong.title) : `<div class="set-song-next"><strong>End of this Sunday’s set</strong></div>`}
+      </section>`;
+  }).join('');
+
+  appEl.innerHTML = `
+    <div class="continuous-topbar">
+      <div class="continuous-topbar-row">
+        <button class="icon-btn" onclick="backToLibrary()" aria-label="Back to library">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EDE6D6" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="continuous-title">
+          <strong>This Sunday’s Set ${state.setlistLocked?'· Locked':''}</strong>
+          <span>${escapeHtml(sundayDateLabel())}</span>
+        </div>
+        <button class="continuous-chord-toggle ${state.chordMode?'on':''}" onclick="toggleChordMode()">
+          ${state.chordMode ? 'Chord diagrams on' : 'Chord diagrams off'}
+        </button>
+      </div>
+      <div class="set-overview" aria-label="Set list song navigation">${overviewHtml}</div>
+    </div>
+    <div class="continuous-intro">
+      <h1>Sunday Set List</h1>
+      <p>Use the song strip or section buttons to jump instantly. Scroll continuously through all ${setSongs.length} song${setSongs.length===1?'':'s'} in the saved order.</p>
+    </div>
+    ${pagesHtml}
+  `;
+
+  const targetId = state.setlistScrollTarget;
+  state.setlistScrollTarget = null;
+  requestAnimationFrame(()=>{
+    if(targetId){
+      const target = document.getElementById(`set-song-${targetId}`);
+      if(target) target.scrollIntoView({behavior:'auto', block:'start'});
+    } else {
+      window.scrollTo(0,0);
+    }
+    setupSetlistScrollTracking();
+  });
+}
+
+function renderSongView(){
+  const song = state.songs.find(s=>s.id===state.currentSongId);
+  if(!song){ state.view='library'; return render(); }
+  const transposedBody = transposeBody(song.body, state.transpose);
+  const displayKey = transposeKeyName(song.key || 'C', state.transpose);
+
+  appEl.innerHTML = `
+    <div class="topbar">
+      <button class="icon-btn" onclick="backToLibrary()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EDE6D6" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div style="flex:1"></div>
+      <button class="icon-btn" onclick="openForm('${song.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EDE6D6" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+      <button class="icon-btn danger" onclick="deleteSong('${song.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C1666B" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+      </button>
+    </div>
+    <div class="song-header">
+      <h2>${escapeHtml(song.title)}</h2>
+    </div>
+    <div class="control-panel">
+      <div class="transpose-group">
+        <button class="transpose-btn" onclick="changeTranspose(-1)">&minus;</button>
+        <div class="key-display">
+          <div class="k">${escapeHtml(displayKey)}</div>
+          <span class="orig">${state.transpose===0 ? 'original key' : 'orig. ' + escapeHtml(song.key||'C')}</span>
+        </div>
+        <button class="transpose-btn" onclick="changeTranspose(1)">&plus;</button>
+      </div>
+      <div class="toggle-wrap">
+        <span class="${state.chordMode ? 'toggle-label-on' : ''}">Chord mode</span>
+        <div class="toggle ${state.chordMode?'on':''}" onclick="toggleChordMode()"><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="song-body">
+      ${renderSongBodyHTML(transposedBody, state.chordMode)}
+    </div>
+  `;
+}
+
+function renderFormView(){
+  const editing = state.editingId ? state.songs.find(s=>s.id===state.editingId) : null;
+  appEl.innerHTML = `
+    <div class="topbar">
+      <button class="icon-btn" onclick="cancelForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EDE6D6" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="song-header">
+      <h2>${editing ? 'Edit song' : 'Add a new song'}</h2>
+    </div>
+    <div class="form-field">
+      <label>Title</label>
+      <input type="text" id="f-title" placeholder="Amazing Grace" value="${editing ? escapeHtml(editing.title) : ''}">
+    </div>
+    <div class="form-field">
+      <label>Original key</label>
+      <select id="f-key">
+        ${ALL_KEYS.map(k=>`<option value="${k}" ${editing && editing.key===k ? 'selected':''}>${k}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Paste chords from a website (optional)</label>
+      <textarea id="f-paste-raw" placeholder="Paste the chord chart exactly as copied from the website..." onpaste="onRawPaste()" style="min-height:160px; font-family:'JetBrains Mono', monospace; font-size:13px;"></textarea>
+      <button class="btn-gold" style="margin-top:8px; width:100%; justify-content:center;" onclick="handlePasteFormat(false)">Convert pasted chord sheet</button>
+      <div id="ai-status" class="form-hint">The chart converts automatically after you paste. It supports chords above lyrics, bracketed chords, bar progressions, and alternating chord/lyric lines.</div>
+    </div>
+    <div class="form-field">
+      <label>Chords &amp; lyrics</label>
+      <textarea id="f-body" placeholder="{Verse 1}\n[G]Amazing [C]grace how [G]sweet the sound\n[G]That saved a [D]wretch like [G]me">${editing ? escapeHtml(editing.body) : ''}</textarea>
+      <div class="form-hint">
+        Put each chord in brackets right before the syllable it belongs to, like <code>[G]Amazing</code>.
+        Use <code>{Verse 1}</code> or <code>{Chorus}</code> on its own line for section labels.
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="cancelForm()">Cancel</button>
+      <button class="btn-primary" onclick="saveForm()">Save song</button>
+    </div>
+  `;
+}
+
+/* ============================= CHORD MODE SHEET ============================= */
+
+function openChordSheet(chordSym){
+  const parsed = parseChordSymbol(chordSym);
+  const existing = document.getElementById('chord-sheet-backdrop');
+  if(existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'backdrop';
+  backdrop.id = 'chord-sheet-backdrop';
+  backdrop.onclick = (e)=>{ if(e.target===backdrop) closeChordSheet(); };
+
+  let bodyHtml;
+  if(!parsed){
+    bodyHtml = `<div class="no-diagram">No fingering data available for "${escapeHtml(chordSym)}".</div>`;
+  } else {
+    const guitarSvg = renderGuitarSVG(parsed.rootIdx, parsed.norm, parsed.bassIdx);
+    const pianoSvg = renderPianoSVG(parsed.rootIdx, parsed.norm, parsed.bassIdx);
+    bodyHtml = `<div class="diagram-row">
+      <div class="diagram-col">
+        <div class="lbl">Guitar</div>
+        ${guitarSvg ? guitarSvg : '<div class="no-diagram">No guitar shape on file for this chord quality &mdash; try the piano voicing.</div>'}
+      </div>
+      <div class="diagram-col">
+        <div class="lbl">Piano</div>
+        ${pianoSvg}
+      </div>
+    </div>`;
+  }
+
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">${escapeHtml(chordSym)}</div>
+      <div class="sheet-sub">tap outside to close</div>
+      ${bodyHtml}
+      <button class="sheet-close" onclick="closeChordSheet()">Close</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+}
+
+function closeChordSheet(){
+  const el = document.getElementById('chord-sheet-backdrop');
+  if(el) el.remove();
+}
+
+/* ============================= PASTED CHORD SHEET IMPORTER ============================= */
+
+// Deterministic, browser-only importer for plain-text chord charts copied from websites.
+// It does not use an AI service or require an API key.
+
+const SECTION_NAMES = [
+  'verse', 'chorus', 'bridge', 'intro', 'outro', 'pre-chorus', 'prechorus',
+  'refrain', 'interlude', 'instrumental', 'tag', 'ending', 'turnaround',
+  'vamp', 'breakdown', 'solo', 'hook', 'coda', 'pre chorus', 'post-chorus', 'post chorus'
+];
+
+const WEBSITE_JUNK_PATTERNS = [
+  /^(?:transpose|simplify chords?|autoscroll|auto scroll|font size|print|download|share|edit|favorite|add to favorites?)$/i,
+  /^(?:chords?|lyrics?|tabs?|official|video|strumming|tuning)\s*$/i,
+  /^(?:difficulty|tuning|capo|tempo|bpm|time signature|author|last edit|rating|views?)\s*[:\-]/i,
+  /^(?:login|sign in|sign up|register|report bad tab|send feedback)$/i,
+  /^\d+\s+(?:views?|comments?|votes?)$/i,
+  /^https?:\/\//i,
+  /^www\./i
+];
+
+function expandTabs(line, tabSize=4){
+  let out = '';
+  for(const ch of line){
+    if(ch === '\t'){
+      const spaces = tabSize - (out.length % tabSize);
+      out += ' '.repeat(spaces);
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+function normalizeMusicText(text){
+  return text
+    .replace(/[♯＃]/g, '#')
+    .replace(/[♭]/g, 'b')
+    .replace(/[–—]/g, '-')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'");
+}
+
+function cleanPastedText(raw){
+  return normalizeMusicText(raw)
+    .replace(/<br\s*\/?\s*>/gi, '\n')
+    .replace(/<\/?(?:p|div|pre|li|tr|h[1-6])[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\u00A0/g, ' ')
+    .split('\n')
+    .map(line => expandTabs(line).replace(/[ \t]+$/g, ''));
+}
+
+function stripTokenPunctuation(raw){
+  let token = normalizeMusicText(raw).trim();
+  token = token.replace(/^[|:;,]+|[|:;,]+$/g, '');
+  token = token.replace(/^\(([^()]+)\)$/, '$1');
+  token = token.replace(/^[`'"“”]+|[`'"“”]+$/g, '');
+  token = token.replace(/[,*]+$/g, '');
+  return token.trim();
+}
+
+function isRhythmToken(raw){
+  const token = stripTokenPunctuation(raw).toLowerCase();
+  return !token ||
+    /^(?:\/+|\\+|[-.]+|%|&|\+|x\d+|\d+x|\(x\d+\)|repeat|rpt|to|fine|hold|let ring)$/i.test(token) ||
+    /^\d+(?:[+.e&a]|and)?$/i.test(token);
+}
+
+function splitChordBass(token){
+  const slash = token.lastIndexOf('/');
+  if(slash <= 0) return { main:token, bass:'' };
+  const possibleBass = token.slice(slash + 1);
+  if(/^[A-G](?:#|b)?$/.test(possibleBass)){
+    return { main:token.slice(0, slash), bass:possibleBass };
+  }
+  return { main:token, bass:'' };
+}
+
+function isChordToken(raw){
+  let token = stripTokenPunctuation(raw);
+  if(!token || isRhythmToken(token)) return false;
+  if(/^(?:N\.?C\.?|no\s+chord)$/i.test(token)) return true;
+
+  const { main, bass } = splitChordBass(token);
+  if(bass && !/^[A-G](?:#|b)?$/.test(bass)) return false;
+
+  const root = main.match(/^([A-G])([#b]?)(.*)$/);
+  if(!root) return false;
+
+  let suffix = root[3] || '';
+  if(!suffix) return true;
+
+  // Remove standard quality words, then verify that only chord-extension notation remains.
+  suffix = suffix
+    .replace(/major|minor/gi, '')
+    .replace(/maj|min|dim|aug|sus|add|omit|power|alt|dom|no/gi, '')
+    .replace(/[mMΔø°]/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/[0-9#b+\-]/g, '');
+
+  return suffix === '';
+}
+
+function cleanChordToken(raw){
+  const token = stripTokenPunctuation(raw);
+  if(/^(?:N\.?C\.?)$/i.test(token)) return 'N.C.';
+  return token;
+}
+
+function scanLineTokens(line){
+  return [...line.matchAll(/\S+/g)].map(match => ({
+    raw: match[0],
+    index: match.index || 0,
+    token: cleanChordToken(match[0])
+  }));
+}
+
+function getChordLineInfo(line){
+  let working = line;
+  const numbered = working.match(/^\s*\d+\s*[.)]\s+(.+)$/);
+  if(numbered) working = numbered[1];
+
+  const scanned = scanLineTokens(working);
+  const chords = [];
+  const unknown = [];
+  let ignored = 0;
+
+  scanned.forEach(item => {
+    if(isRhythmToken(item.raw) || /^[|:]+$/.test(item.raw)){
+      ignored++;
+      return;
+    }
+    if(isChordToken(item.token)){
+      const chordOffset = Math.max(0, item.raw.search(/[A-GN]/i));
+      chords.push({ symbol:cleanChordToken(item.token), index:item.index + chordOffset });
+    } else {
+      unknown.push(item.token);
+    }
+  });
+
+  const meaningful = chords.length + unknown.length;
+  const ratio = meaningful ? chords.length / meaningful : 0;
+  const hasBars = /\|/.test(working);
+  const hasWideSpacing = /\S\s{2,}\S/.test(working);
+  const compactChordRow = chords.length >= 2 && unknown.length === 0;
+  const singleChordRow = chords.length === 1 && unknown.length === 0 && meaningful === 1;
+  const tolerantNotationRow = chords.length >= 2 && ratio >= 0.6 && unknown.length <= 2;
+
+  return {
+    isChordLine: singleChordRow || compactChordRow || (hasBars && chords.length > 0 && ratio >= 0.5) ||
+      (hasWideSpacing && chords.length > 0 && ratio >= 0.5) || tolerantNotationRow,
+    chords,
+    unknown,
+    ignored,
+    ratio,
+    hasBars,
+    hasWideSpacing,
+    source:working
+  };
+}
+
+function normalizeSectionText(text){
+  return text
+    .replace(/^[\[{(]\s*/, '')
+    .replace(/\s*[\]})]$/, '')
+    .replace(/[:：]\s*$/, '')
+    .replace(/[–—_]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getSectionLabel(line){
+  const raw = line.trim();
+  const commentDirective = raw.match(/^\{(?:comment|c)\s*:\s*(.+)\}$/i);
+  const blockDirective = raw.match(/^\{(?:start_of_|start-of-)?(verse|chorus|bridge|intro|outro|refrain|interlude|instrumental|tag|ending)(?:\s*\d*)?\}$/i);
+  const text = normalizeSectionText(commentDirective ? commentDirective[1] : (blockDirective ? blockDirective[1] : raw));
+  if(!text || text.length > 55) return null;
+
+  const normalized = text.toLowerCase();
+  const isSection = SECTION_NAMES.some(name =>
+    normalized === name ||
+    normalized.startsWith(name + ' ') ||
+    normalized.startsWith(name + '-') ||
+    new RegExp('^' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\d+$', 'i').test(normalized)
+  );
+
+  return isSection ? text : null;
+}
+
+function splitSectionAndContent(line){
+  const trimmed = line.trim();
+  const match = trimmed.match(/^([A-Za-z][A-Za-z\s-]*?\d*)\s*[:\-]\s*(.+)$/);
+  if(!match) return null;
+  const section = getSectionLabel(match[1]);
+  if(!section) return null;
+  return { section, content:match[2].trim() };
+}
+
+function isWebsiteJunkLine(line){
+  const trimmed = line.trim();
+  if(!trimmed) return false;
+  return WEBSITE_JUNK_PATTERNS.some(pattern => pattern.test(trimmed));
+}
+
+function extractMetadata(lines){
+  const meta = { title:'', key:'', capo:'' };
+  const remaining = [];
+
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+    let match;
+
+    if((match = trimmed.match(/^\{(?:title|t)\s*:\s*(.+)\}$/i)) ||
+       (match = trimmed.match(/^title\s*[:\-]\s*(.+)$/i))){
+      meta.title = match[1].trim();
+      return;
+    }
+    // Discard artist/author metadata; the app intentionally stores titles only.
+    if(trimmed.match(/^\{(?:artist|subtitle|st)\s*:\s*(.+)\}$/i) ||
+       trimmed.match(/^(?:artist|author|performed by|written by|by)\s*[:\-]\s*(.+)$/i)){
+      return;
+    }
+    if((match = trimmed.match(/^\{key\s*:\s*([A-G](?:#|b)?)(?:m|min)?\s*\}$/i)) ||
+       (match = trimmed.match(/^(?:original\s+)?key\s*[:\-]\s*([A-G](?:#|b)?)(?:m|min)?\b/i))){
+      const key = normalizeMusicText(match[1]);
+      meta.key = PREFERRED_NAME[NOTE_INDEX[key]] || key;
+      return;
+    }
+    if((match = trimmed.match(/^capo\s*[:\-]?\s*(\d+)\b/i))){
+      meta.capo = match[1];
+      return;
+    }
+
+    // Remove common page controls. Keep unknown text because it may be a lyric or title.
+    if(isWebsiteJunkLine(trimmed)) return;
+
+    // Common copied-page headers, usually before the actual chart.
+    if(index < 15 && /^(?:home|songs?|artists?|chord charts?|search|menu)$/i.test(trimmed)) return;
+
+    remaining.push(line);
+  });
+
+  return { meta, lines:remaining };
+}
+
+function hasInlineChords(line){
+  return /\[(?:[A-G](?:#|b)?|N\.?C\.?)[^\]]*\]/i.test(line);
+}
+
+function normalizeInlineChordLine(line){
+  return normalizeMusicText(line.trim()).replace(/\[\s*([^\]]+?)\s*\]/g, (whole, token) => {
+    return isChordToken(token) ? `[${cleanChordToken(token)}]` : whole;
+  });
+}
+
+function normalizeParenthesizedChordLine(line){
+  let converted = 0;
+  const result = normalizeMusicText(line.trim()).replace(/\(([^()]+)\)/g, (whole, token) => {
+    if(!isChordToken(token)) return whole;
+    converted++;
+    return `[${cleanChordToken(token)}]`;
+  });
+  return converted ? result : null;
+}
+
+function formatProgression(chords){
+  return chords.map(chord => `[${chord.symbol}]`).join(' ');
+}
+
+function lyricWordStarts(lyric){
+  const starts = [];
+  for(const match of lyric.matchAll(/\S+/g)) starts.push(match.index || 0);
+  return starts;
+}
+
+function nearestWordStart(lyric, target){
+  const starts = lyricWordStarts(lyric);
+  if(!starts.length) return 0;
+  let best = starts[0];
+  let bestDistance = Math.abs(best - target);
+  starts.forEach(start => {
+    const distance = Math.abs(start - target);
+    if(distance < bestDistance){
+      best = start;
+      bestDistance = distance;
+    }
+  });
+  return best;
+}
+
+function distributeChordPositions(lyric, chords){
+  const starts = lyricWordStarts(lyric);
+  if(!starts.length) return chords.map(chord => ({ index:0, text:`[${chord.symbol}]` }));
+  if(chords.length === 1) return [{ index:starts[0], text:`[${chords[0].symbol}]` }];
+
+  return chords.map((chord, idx) => {
+    const targetWord = Math.round(idx * (starts.length - 1) / Math.max(1, chords.length - 1));
+    return { index:starts[targetWord], text:`[${chord.symbol}]` };
+  });
+}
+
+function placeChordsOverLyrics(chordLine, lyricLine, chords){
+  const lyricIndent = (lyricLine.match(/^\s*/) || [''])[0].length;
+  const lyric = lyricLine.slice(lyricIndent).trimEnd();
+  if(!lyric.trim()) return formatProgression(chords);
+
+  const positions = chords.map(chord => chord.index);
+  const maxPosition = positions.length ? Math.max(...positions) : 0;
+  const minPosition = positions.length ? Math.min(...positions) : 0;
+  const spacingSpan = maxPosition - minPosition;
+  const compactSpacingLost = chords.length > 1 &&
+    (spacingSpan <= Math.max(4, chords.length * 3) || chordLine.trim().length < chords.length * 4);
+
+  let inserts;
+  if(compactSpacingLost){
+    inserts = distributeChordPositions(lyric, chords);
+  } else {
+    inserts = chords.map(chord => {
+      // chord.index is already the visual column in the original chord row.
+      // Because the lyric's own indentation was removed above, subtract only
+      // that lyric indentation. Adding the chord indentation again shifts every
+      // chord to the right and can place it inside the wrong word.
+      let target = Math.max(0, chord.index - lyricIndent);
+      target = Math.min(target, lyric.length);
+
+      // When the chord is above whitespace, attach it to the nearest following word.
+      if(target < lyric.length && lyric[target] === ' '){
+        const nextWord = lyric.slice(target).search(/\S/);
+        if(nextWord >= 0) target += nextWord;
+      }
+
+      // Very small copy/paste alignment errors should snap to the nearest word start.
+      const nearest = nearestWordStart(lyric, target);
+      if(Math.abs(nearest - target) <= 2) target = nearest;
+
+      if(target >= lyric.length && lyric.trim()){
+        const starts = lyricWordStarts(lyric);
+        target = starts[starts.length - 1] || 0;
+      }
+      return { index:target, text:`[${chord.symbol}]` };
+    });
+  }
+
+  // Keep multiple chords at the same location in their original order.
+  const grouped = new Map();
+  inserts.forEach((item, idx) => {
+    if(!grouped.has(item.index)) grouped.set(item.index, []);
+    grouped.get(item.index).push({ ...item, order:idx });
+  });
+
+  let result = lyric;
+  [...grouped.entries()]
+    .sort((a,b) => b[0] - a[0])
+    .forEach(([index, items]) => {
+      const text = items.sort((a,b) => a.order - b.order).map(item => item.text).join(' ');
+      result = result.slice(0, index) + text + result.slice(index);
+    });
+
+  return result.trimEnd();
+}
+
+function nextNonBlankIndex(lines, start){
+  let i = start;
+  while(i < lines.length && !lines[i].trim()) i++;
+  return i < lines.length ? i : -1;
+}
+
+function collectAlternatingChordFragments(lines, startIndex){
+  const pairs = [];
+  let cursor = startIndex;
+
+  while(cursor < lines.length){
+    const chordIndex = nextNonBlankIndex(lines, cursor);
+    if(chordIndex < 0) break;
+
+    const chordInfo = getChordLineInfo(lines[chordIndex]);
+    if(!chordInfo.isChordLine || chordInfo.chords.length !== 1 || chordInfo.hasBars) break;
+
+    const lyricIndex = nextNonBlankIndex(lines, chordIndex + 1);
+    if(lyricIndex < 0) break;
+    const lyric = lines[lyricIndex];
+    if(getSectionLabel(lyric) || getChordLineInfo(lyric).isChordLine || hasInlineChords(lyric)) break;
+
+    pairs.push({ chord:chordInfo.chords[0].symbol, lyric:lyric.trim(), lyricIndex });
+    cursor = lyricIndex + 1;
+  }
+
+  const averageLength = pairs.length
+    ? pairs.reduce((sum, pair) => sum + pair.lyric.length, 0) / pairs.length
+    : 0;
+  const shortFragments = pairs.filter(pair => pair.lyric.length <= 45).length;
+
+  return {
+    pairs,
+    nextIndex:cursor,
+    shouldJoin:pairs.length >= 2 && (averageLength <= 52 || shortFragments / pairs.length >= 0.75)
+  };
+}
+
+function collectChordOnlySequence(lines, startIndex){
+  const chords = [];
+  let cursor = startIndex;
+
+  while(cursor < lines.length){
+    const lineIndex = nextNonBlankIndex(lines, cursor);
+    if(lineIndex < 0 || getSectionLabel(lines[lineIndex])) break;
+    const info = getChordLineInfo(lines[lineIndex]);
+    if(!info.isChordLine || info.chords.length !== 1 || info.hasBars) break;
+    chords.push(info.chords[0]);
+    cursor = lineIndex + 1;
+  }
+
+  return { chords, nextIndex:cursor, shouldJoin:chords.length >= 2 };
+}
+
+function formatMixedChordLyricLine(line){
+  const scanned = scanLineTokens(line);
+  if(scanned.length < 3) return null;
+
+  const chordItems = scanned.filter(item => isChordToken(item.token));
+  const lyricItems = scanned.filter(item => !isChordToken(item.token) && !isRhythmToken(item.token));
+  if(chordItems.length < 2 || lyricItems.length < 2) return null;
+  if(!isChordToken(scanned[0].token)) return null;
+
+  const distinctChords = new Set(chordItems.map(item => item.token.toUpperCase()));
+  const hasUnambiguousChord = chordItems.some(item => /[#b0-9/]|maj|min|sus|dim|aug|add|^N\.?C/i.test(item.token));
+  if(distinctChords.size < 2 && !hasUnambiguousChord) return null;
+
+  return scanned.map(item => {
+    if(isChordToken(item.token)) return `[${cleanChordToken(item.token)}]`;
+    if(isRhythmToken(item.token)) return '';
+    return item.raw;
+  }).filter(Boolean).join(' ').replace(/\]\s+(?=[^[])/g, ']');
+}
+
+function formatLeadingChordLyricLine(line){
+  // A complete chord row must be paired with the following lyric row. Without
+  // this guard, a row such as "D Em D G D Bm A" was incorrectly treated as
+  // four leading chords followed by the fake lyric text "D Bm A".
+  if(getChordLineInfo(line).isChordLine) return null;
+
+  const scanned = scanLineTokens(line);
+  if(scanned.length < 2 || !isChordToken(scanned[0].token)) return null;
+
+  let chordEnd = 0;
+  while(chordEnd < scanned.length && chordEnd < 4 && isChordToken(scanned[chordEnd].token)) chordEnd++;
+  if(chordEnd === scanned.length) return null;
+
+  const lyricStart = scanned[chordEnd].index;
+  const lyric = line.slice(lyricStart).trim();
+  if(!/[A-Za-z]/.test(lyric) || lyric.split(/\s+/).length < 2) return null;
+
+  const firstToken = cleanChordToken(scanned[0].token);
+  const gapAfterFirst = scanned[1].index - (scanned[0].index + scanned[0].raw.length);
+  // A sentence beginning with the article "A" should remain a lyric, not become an A chord.
+  if(chordEnd === 1 && firstToken === 'A' && gapAfterFirst < 2) return null;
+
+  const chords = scanned.slice(0, chordEnd).map(item => `[${cleanChordToken(item.token)}]`);
+  return chords.length === 1 ? `${chords[0]}${lyric}` : `${chords.join(' ')} ${lyric}`;
+}
+
+function getRootFromChord(symbol){
+  const match = cleanChordToken(symbol).match(/^([A-G](?:#|b)?)/);
+  return match ? normalizeMusicText(match[1][0].toUpperCase() + match[1].slice(1)) : null;
+}
+
+function getSimpleChordQuality(symbol){
+  const token = cleanChordToken(symbol).split('/')[0];
+  const match = token.match(/^[A-G](?:#|b)?(.*)$/);
+  const suffix = match ? (match[1] || '').toLowerCase() : '';
+  if(/dim|°|ø/.test(suffix)) return 'dim';
+  if((/^m/.test(suffix) || /min/.test(suffix)) && !/^maj/.test(suffix)) return 'min';
+  return 'maj';
+}
+
+function inferKeyFromChords(chordSymbols){
+  const chordData = chordSymbols.map(symbol => {
+    const root = getRootFromChord(symbol);
+    return root && NOTE_INDEX[root] !== undefined
+      ? { root:NOTE_INDEX[root], quality:getSimpleChordQuality(symbol) }
+      : null;
+  }).filter(Boolean);
+  if(!chordData.length) return '';
+
+  const first = chordData[0].root;
+  const last = chordData[chordData.length - 1].root;
+  const majorScale = [0,2,4,5,7,9,11];
+  const expectedQuality = ['maj','min','min','maj','maj','min','dim'];
+
+  let best = { key:first, score:-Infinity };
+  for(let tonic=0; tonic<12; tonic++){
+    let score = 0;
+    chordData.forEach(chord => {
+      const interval = ((chord.root - tonic) % 12 + 12) % 12;
+      const degree = majorScale.indexOf(interval);
+      if(degree >= 0){
+        score += 1;
+        score += chord.quality === expectedQuality[degree] ? 1.1 : -0.55;
+      } else {
+        score -= 0.9;
+      }
+      if(interval === 0) score += 0.9;
+      if(interval === 7 && chord.quality === 'maj') score += 0.45;
+    });
+    if(first === tonic) score += 2.25;
+    if(last === tonic) score += 1.4;
+    if(score > best.score) best = { key:tonic, score };
+  }
+
+  return PREFERRED_NAME[best.key] || '';
+}
+
+function formatPastedChordSheet(rawText){
+  const cleanedLines = cleanPastedText(rawText);
+  const { meta, lines } = extractMetadata(cleanedLines);
+  const output = [];
+  const allChords = [];
+  let convertedLinePairs = 0;
+  let convertedFragments = 0;
+  let ignoredLines = 0;
+
+  function addChords(chords){
+    chords.forEach(chord => allChords.push(chord.symbol || chord));
+  }
+
+  for(let i=0; i<lines.length;){
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if(!trimmed){
+      if(output.length && output[output.length - 1] !== '') output.push('');
+      i++;
+      continue;
+    }
+
+    if(isWebsiteJunkLine(trimmed)){
+      ignoredLines++;
+      i++;
+      continue;
+    }
+
+    const sectionWithContent = splitSectionAndContent(line);
+    if(sectionWithContent){
+      output.push(`{${sectionWithContent.section}}`);
+      const contentInfo = getChordLineInfo(sectionWithContent.content);
+      if(contentInfo.isChordLine){
+        output.push(formatProgression(contentInfo.chords));
+        addChords(contentInfo.chords);
+      } else {
+        const mixed = formatMixedChordLyricLine(sectionWithContent.content) ||
+          formatLeadingChordLyricLine(sectionWithContent.content);
+        output.push(mixed || sectionWithContent.content);
+      }
+      i++;
+      continue;
+    }
+
+    const section = getSectionLabel(line);
+    if(section){
+      output.push(`{${section}}`);
+      i++;
+      continue;
+    }
+
+    if(hasInlineChords(line)){
+      const normalized = normalizeInlineChordLine(line);
+      output.push(normalized);
+      const matches = [...normalized.matchAll(/\[([^\]]+)\]/g)]
+        .map(match => match[1])
+        .filter(isChordToken);
+      addChords(matches);
+      i++;
+      continue;
+    }
+
+    const parenthesizedLine = normalizeParenthesizedChordLine(line);
+    if(parenthesizedLine){
+      output.push(parenthesizedLine);
+      const matches = [...parenthesizedLine.matchAll(/\[([^\]]+)\]/g)].map(match => match[1]);
+      addChords(matches);
+      i++;
+      continue;
+    }
+
+    const mixedLine = formatMixedChordLyricLine(line);
+    if(mixedLine){
+      output.push(mixedLine);
+      const matches = [...mixedLine.matchAll(/\[([^\]]+)\]/g)].map(match => match[1]);
+      addChords(matches);
+      i++;
+      continue;
+    }
+
+    const leadingChordLine = formatLeadingChordLyricLine(line);
+    if(leadingChordLine){
+      output.push(leadingChordLine);
+      const matches = [...leadingChordLine.matchAll(/\[([^\]]+)\]/g)].map(match => match[1]);
+      addChords(matches);
+      i++;
+      continue;
+    }
+
+    const chordInfo = getChordLineInfo(line);
+    if(chordInfo.isChordLine){
+      const alternating = collectAlternatingChordFragments(lines, i);
+      if(alternating.shouldJoin){
+        output.push(alternating.pairs.map(pair => `[${pair.chord}]${pair.lyric}`).join(' '));
+        addChords(alternating.pairs.map(pair => pair.chord));
+        convertedFragments += alternating.pairs.length;
+        i = alternating.nextIndex;
+        continue;
+      }
+
+      const chordSequence = collectChordOnlySequence(lines, i);
+      if(chordSequence.shouldJoin){
+        output.push(formatProgression(chordSequence.chords));
+        addChords(chordSequence.chords);
+        i = chordSequence.nextIndex;
+        continue;
+      }
+
+      const nextIndex = nextNonBlankIndex(lines, i + 1);
+      const nextLine = nextIndex >= 0 ? lines[nextIndex] : null;
+      const nextInfo = nextLine !== null ? getChordLineInfo(nextLine) : null;
+      const nextIsLyrics = nextLine !== null &&
+        !getSectionLabel(nextLine) &&
+        !(nextInfo && nextInfo.isChordLine) &&
+        !hasInlineChords(nextLine) &&
+        !isWebsiteJunkLine(nextLine);
+
+      if(nextIsLyrics && !chordInfo.hasBars){
+        output.push(placeChordsOverLyrics(line, nextLine, chordInfo.chords));
+        addChords(chordInfo.chords);
+        convertedLinePairs++;
+        i = nextIndex + 1;
+        continue;
+      }
+
+      output.push(formatProgression(chordInfo.chords));
+      addChords(chordInfo.chords);
+      i++;
+      continue;
+    }
+
+    output.push(trimmed);
+    i++;
+  }
+
+  const body = output
+    .join('\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/(\{[^}\n]+\})\n{2,}/g, '$1\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  if(!meta.key) meta.key = inferKeyFromChords(allChords);
+
+  return {
+    ...meta,
+    body,
+    chordCount:allChords.length,
+    convertedLinePairs,
+    convertedFragments,
+    ignoredLines
+  };
+}
+
+function onRawPaste(){
+  window.setTimeout(() => handlePasteFormat(true), 0);
+}
+
+function handlePasteFormat(autoTriggered=false){
+  const rawEl = document.getElementById('f-paste-raw');
+  const statusEl = document.getElementById('ai-status');
+  const raw = rawEl ? rawEl.value.trim() : '';
+
+  if(!raw){
+    if(statusEl) statusEl.textContent = 'Paste some chords and lyrics first.';
+    if(rawEl && !autoTriggered) rawEl.focus();
+    return;
+  }
+
+  try{
+    if(statusEl) statusEl.textContent = 'Converting the pasted chord sheet...';
+    const parsed = formatPastedChordSheet(raw);
+    fillFormFromFormatter(parsed);
+
+    if(!statusEl) return;
+    if(parsed.chordCount > 0){
+      const details = [];
+      if(parsed.convertedLinePairs) details.push(`${parsed.convertedLinePairs} chord/lyric line pair${parsed.convertedLinePairs===1?'':'s'}`);
+      if(parsed.convertedFragments) details.push(`${parsed.convertedFragments} lyric fragment${parsed.convertedFragments===1?'':'s'}`);
+      statusEl.textContent = `Converted ${parsed.chordCount} chord${parsed.chordCount===1?'':'s'}${details.length ? ' from ' + details.join(' and ') : ''}. Review the result below before saving.`;
+    } else {
+      statusEl.textContent = 'The text was copied, but no recognizable chord symbols were found. Copy the chart itself rather than the page navigation or lyrics-only view.';
+    }
+  }catch(error){
+    console.error('Chord import failed', error);
+    if(statusEl) statusEl.textContent = 'This chart could not be converted. The original paste is still above so you can adjust it and try again.';
+  }
+}
+
+function fillFormFromFormatter(parsed){
+  const titleEl = document.getElementById('f-title');
+  const keyEl = document.getElementById('f-key');
+  const bodyEl = document.getElementById('f-body');
+
+  if(parsed.title && titleEl && !titleEl.value.trim()) titleEl.value = parsed.title;
+  if(parsed.key && keyEl && ALL_KEYS.includes(parsed.key)) keyEl.value = parsed.key;
+  if(bodyEl) bodyEl.value = parsed.body || '';
+}
+
+
+/* ============================= ACTIONS ============================= */
+
+let setlistScrollHandler = null;
+let activeTrackedSongId = null;
+
+function teardownSetlistScrollTracking(){
+  if(setlistScrollHandler){
+    window.removeEventListener('scroll', setlistScrollHandler);
+    setlistScrollHandler = null;
+  }
+  activeTrackedSongId = null;
+}
+
+function setActiveOverviewChip(songId){
+  if(!songId || songId===activeTrackedSongId) return;
+  activeTrackedSongId = songId;
+  document.querySelectorAll('[data-set-chip]').forEach(chip=>{
+    chip.classList.toggle('active', chip.dataset.setChip === songId);
+  });
+  const active = document.querySelector(`[data-set-chip="${CSS.escape(songId)}"]`);
+  if(active) active.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+function setupSetlistScrollTracking(){
+  teardownSetlistScrollTracking();
+  const update = ()=>{
+    const pages = [...document.querySelectorAll('.set-song-page')];
+    if(!pages.length) return;
+    const marker = Math.min(180, window.innerHeight * 0.28);
+    let active = pages[0];
+    for(const page of pages){
+      if(page.getBoundingClientRect().top <= marker) active = page;
+      else break;
+    }
+    setActiveOverviewChip(active.dataset.setSongId);
+  };
+  let ticking = false;
+  setlistScrollHandler = ()=>{
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(()=>{ ticking=false; update(); });
+  };
+  window.addEventListener('scroll', setlistScrollHandler, {passive:true});
+  update();
+}
+
+function jumpToSetSong(id){
+  const target = document.getElementById(`set-song-${id}`);
+  if(target){
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+    setActiveOverviewChip(id);
+  }
+}
+
+function jumpToSongSection(songId, sectionIndex){
+  const target = document.getElementById(`section-${songId}-${sectionIndex}`);
+  if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+async function toggleSetlistLock(){
+  if(state.setlistLocked && !confirm('Unlock this Sunday’s set for editing?')) return;
+  state.setlistLocked = !state.setlistLocked;
+  await saveSundaySetlist();
+  render();
+}
+
+function openSetlistNotes(id){
+  if(state.setlistLocked){
+    alert('Unlock the set before changing rehearsal notes.');
+    return;
+  }
+  const song = state.songs.find(item=>item.id===id);
+  if(!song) return;
+  closeSetlistNotes();
+  const backdrop = document.createElement('div');
+  backdrop.className = 'backdrop';
+  backdrop.id = 'setlist-notes-backdrop';
+  backdrop.onclick = event=>{ if(event.target===backdrop) closeSetlistNotes(); };
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title" style="font-size:23px">${escapeHtml(song.title)}</div>
+      <div class="sheet-sub">Optional rehearsal notes for this Sunday only</div>
+      <textarea id="setlist-note-text" class="notes-textarea" placeholder="Example: Repeat bridge twice, drop drums after chorus, keys begin intro…">${escapeHtml(state.setlistNotes[id] || '')}</textarea>
+      <div class="notes-actions">
+        <button class="btn-secondary" onclick="closeSetlistNotes()">Cancel</button>
+        <button class="btn-primary" onclick="saveSetlistNote('${id}')">Save note</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  requestAnimationFrame(()=>{
+    const field = document.getElementById('setlist-note-text');
+    if(field){ field.focus(); field.setSelectionRange(field.value.length, field.value.length); }
+  });
+}
+
+function closeSetlistNotes(){
+  const el = document.getElementById('setlist-notes-backdrop');
+  if(el) el.remove();
+}
+
+async function saveSetlistNote(id){
+  if(state.setlistLocked) return;
+  const field = document.getElementById('setlist-note-text');
+  const note = field ? field.value.trim() : '';
+  if(note) state.setlistNotes[id] = note;
+  else delete state.setlistNotes[id];
+  await saveSundaySetlist();
+  closeSetlistNotes();
+  render();
+}
+
+function onSearch(val){
+  state.search = val;
+  const results = document.getElementById('library-song-results');
+  if(results) results.innerHTML = renderLibrarySongResults();
+}
+
+async function addSongFromSetlistSearch(){
+  if(state.setlistLocked) return;
+  const input = document.getElementById('setlist-song-search');
+  if(!input) return;
+  const query = input.value.trim().toLowerCase();
+  if(!query) return;
+
+  const available = state.songs.filter(song => !state.sundaySetlist.includes(song.id));
+  let matches = available.filter(song => setlistOptionLabel(song).toLowerCase() === query);
+  if(matches.length===0){
+    matches = available.filter(song => song.title.toLowerCase() === query);
+  }
+  if(matches.length===0){
+    matches = available.filter(song =>
+      song.title.toLowerCase().includes(query)
+    );
+  }
+
+  if(matches.length===0){
+    alert('No available song matches that search.');
+    return;
+  }
+  if(matches.length>1){
+    alert('More than one song matches. Choose a full title from the suggestions.');
+    return;
+  }
+
+  state.sundaySetlist.push(matches[0].id);
+  await saveSundaySetlist();
+  render();
+}
+
+async function removeFromSetlist(id){
+  if(state.setlistLocked) return;
+  state.sundaySetlist = state.sundaySetlist.filter(songId => songId !== id);
+  delete state.setlistNotes[id];
+  await saveSundaySetlist();
+  render();
+}
+
+async function moveSetlistSong(id, direction){
+  if(state.setlistLocked) return;
+  const index = state.sundaySetlist.indexOf(id);
+  const target = index + direction;
+  if(index < 0 || target < 0 || target >= state.sundaySetlist.length) return;
+  [state.sundaySetlist[index], state.sundaySetlist[target]] = [state.sundaySetlist[target], state.sundaySetlist[index]];
+  await saveSundaySetlist();
+  render();
+}
+
+async function clearSundaySetlist(){
+  if(state.setlistLocked) return;
+  if(!confirm('Clear every song from this Sunday’s set list?')) return;
+  state.sundaySetlist = [];
+  state.setlistNotes = {};
+  await saveSundaySetlist();
+  render();
+}
+
+function openSong(id){
+  state.currentSongId = id;
+  state.transpose = 0;
+  state.chordMode = false;
+  state.view = 'song';
+  render();
+  window.scrollTo(0,0);
+}
+
+function openSetlistSong(id){
+  if(!state.sundaySetlist.includes(id)){
+    openSong(id);
+    return;
+  }
+  state.currentSongId = id;
+  state.chordMode = false;
+  state.setlistScrollTarget = id;
+  state.view = 'setlist';
+  render();
+}
+
+function backToLibrary(){
+  state.view='library';
+  state.setlistScrollTarget = null;
+  render();
+  window.scrollTo(0,0);
+}
+
+function changeTranspose(delta){ state.transpose += delta; render(); }
+
+function changeSetlistTranspose(id, delta){
+  const currentScroll = window.scrollY;
+  state.setlistTransposes[id] = (state.setlistTransposes[id] || 0) + delta;
+  render();
+  requestAnimationFrame(()=>window.scrollTo(0,currentScroll));
+}
+
+function toggleChordMode(){
+  state.chordMode = !state.chordMode;
+  if(state.view === 'setlist'){
+    const currentScroll = window.scrollY;
+    render();
+    requestAnimationFrame(()=>window.scrollTo(0,currentScroll));
+  } else {
+    render();
+  }
+}
+
+function openForm(id){
+  state.editingId = id || null;
+  state.formReturnView = state.view === 'setlist' ? 'setlist' : (id ? 'song' : 'library');
+  state.view = 'form';
+  render();
+  window.scrollTo(0,0);
+}
+
+function cancelForm(){
+  state.view = state.formReturnView || (state.editingId ? 'song' : 'library');
+  render();
+}
+
+async function saveForm(){
+  const title = document.getElementById('f-title').value.trim();
+  const key = document.getElementById('f-key').value;
+  const body = document.getElementById('f-body').value;
+
+  if(!title){ alert('Please give the song a title.'); return; }
+
+  if(state.editingId){
+    const idx = state.songs.findIndex(s=>s.id===state.editingId);
+    const { artist, ...existingSong } = state.songs[idx];
+    state.songs[idx] = { ...existingSong, title, key, body };
+    state.currentSongId = state.editingId;
+  } else {
+    const newSong = { id: uid(), title, key, body };
+    state.songs.push(newSong);
+    state.currentSongId = newSong.id;
+  }
+  state.songs.sort((a,b)=> a.title.localeCompare(b.title));
+  await saveSongs(state.songs);
+  state.transpose = 0;
+  state.chordMode = false;
+  state.view = state.formReturnView === 'setlist' ? 'setlist' : 'song';
+  render();
+}
+
+async function deleteSong(id){
+  if(!confirm('Delete this song from the library? This cannot be undone.')) return;
+  state.songs = state.songs.filter(s=>s.id!==id);
+  state.sundaySetlist = state.sundaySetlist.filter(songId=>songId!==id);
+  delete state.setlistNotes[id];
+  await Promise.all([saveSongs(state.songs), saveSundaySetlist()]);
+  state.view = 'library';
+  render();
+}
+
+/* ============================= INIT ============================= */
+
+async function init(){
+  render();
+  let songs = await loadSongs();
+  if(!songs){
+    songs = SAMPLE_SONGS;
+    await saveSongs(songs);
+  }
+  const hadArtistMetadata = songs.some(song => Object.prototype.hasOwnProperty.call(song, 'artist'));
+  state.songs = songs.map(song => {
+    const { artist, ...titleOnlySong } = song;
+    return titleOnlySong;
+  }).sort((a,b)=> a.title.localeCompare(b.title));
+  if(hadArtistMetadata) await saveSongs(state.songs);
+  const setlistData = await loadSundaySetlist();
+  state.sundaySetlist = setlistData.songIds.filter((id,index,arr)=>
+    arr.indexOf(id)===index && state.songs.some(song=>song.id===id)
+  );
+  state.setlistNotes = Object.fromEntries(
+    Object.entries(setlistData.notes || {}).filter(([id])=>state.sundaySetlist.includes(id))
+  );
+  state.setlistLocked = Boolean(setlistData.locked);
+  if(state.sundaySetlist.length !== setlistData.songIds.length || setlistData.sundayDate !== currentSundayDateKey() || !setlistData.notes){
+    await saveSundaySetlist();
+  }
+  state.loading = false;
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
