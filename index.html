@@ -2022,6 +2022,15 @@ function parseChordProFileText(rawText, filename=''){
       continue;
     }
 
+    // Many downloaded ChordPro/text files use plain section headings such as
+    // "Verse 1", "Chorus", or "Bridge" instead of {start_of_...}
+    // directives. Convert those headings before preserving the lyric line.
+    const plainSection = getSectionLabel(trimmed);
+    if(plainSection){
+      bodyLines.push(`{${plainSection}}`);
+      continue;
+    }
+
     // ChordPro's native [Chord]lyric syntax is already the app's preferred syntax.
     bodyLines.push(line.replace(/\\\[/g,'[').replace(/\\\]/g,']'));
   }
