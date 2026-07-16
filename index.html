@@ -337,6 +337,52 @@
     font-size:13px; text-decoration:underline;
   }
 
+
+  /* ---------- Mobile chord-sheet layout ---------- */
+  @media (max-width: 640px){
+    body{ overflow-x:hidden; }
+    .app{ width:100%; padding:18px 14px 64px; }
+    .song-body{ font-size:15px; line-height:1.55; min-width:0; }
+
+    /*
+      On desktop, each lyric row stays on one line and can be scrolled.
+      On phones, let the chord/lyric units wrap while reserving vertical
+      space for each chord so it remains above the correct lyric fragment.
+    */
+    .lyric-line{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:flex-end;
+      white-space:normal;
+      overflow:visible;
+      width:100%;
+      max-width:100%;
+      padding:0 0 9px;
+      row-gap:2px;
+    }
+    .cl-unit{
+      flex:0 1 auto;
+      min-width:0;
+      max-width:100%;
+      padding-top:22px;
+    }
+    .cl-unit .chord{
+      top:2px;
+      left:0;
+    }
+    .cl-unit .lyric{
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
+      word-break:normal;
+    }
+
+    /* Keep generated transition progressions readable in portrait mode too. */
+    .transition-progression{
+      white-space:normal;
+      overflow-wrap:anywhere;
+    }
+  }
+
   .hidden{ display:none !important; }
 </style>
 </head>
