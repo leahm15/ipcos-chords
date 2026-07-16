@@ -317,16 +317,46 @@
     color: var(--gold); text-transform:uppercase; margin: 20px 0 6px; opacity:0.85;
   }
   .section-label:first-child{ margin-top:0; }
-  .lyric-line{ white-space:nowrap; overflow-x:auto; overflow-y:visible; padding:22px 0 6px; position:relative; }
+  .lyric-line{ white-space:nowrap; overflow-x:auto; overflow-y:visible; padding:2px 0 6px; position:relative; }
   .lyric-line::-webkit-scrollbar{ height:3px; }
-  .cl-unit{ position:relative; display:inline-block; vertical-align:bottom; }
+
+  /*
+    Each chord/lyric pair is a tiny two-row grid. Keeping the chord in normal
+    layout flow makes the unit at least as wide as the chord label, so longer
+    symbols such as D/F# cannot overlap the chord that follows it.
+  */
+  .cl-unit{
+    position:relative;
+    display:inline-grid;
+    grid-template-rows:18px auto;
+    grid-template-columns:max-content;
+    align-items:end;
+    vertical-align:bottom;
+    min-width:0;
+  }
   .cl-unit .chord{
-    position:absolute; top:-20px; left:0; font-family:'JetBrains Mono', monospace;
-    font-size:13px; font-weight:700; color: var(--gold); white-space:nowrap; line-height:1;
+    position:static;
+    grid-row:1;
+    grid-column:1;
+    align-self:end;
+    justify-self:start;
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    font-weight:700;
+    color:var(--gold);
+    white-space:nowrap;
+    line-height:1;
+    z-index:1;
   }
   .cl-unit .chord.tappable{ cursor:pointer; padding:1px 3px; margin-left:-3px; border-radius:5px; }
   .cl-unit .chord.tappable:active{ background: var(--gold-dim); }
-  .cl-unit .lyric{ white-space:pre; }
+  .cl-unit .lyric{
+    grid-row:2;
+    grid-column:1;
+    white-space:pre;
+    min-width:0;
+  }
+  .cl-unit.chord-wide{ padding-right:4px; }
   .blank-line{ height:12px; }
 
   /* ---------- Upload / edit form ---------- */
@@ -402,11 +432,13 @@
       flex:0 1 auto;
       min-width:0;
       max-width:100%;
-      padding-top:22px;
+      padding-top:0;
+      grid-template-rows:18px auto;
     }
     .cl-unit .chord{
-      top:2px;
-      left:0;
+      position:static;
+      top:auto;
+      left:auto;
     }
     .cl-unit .lyric{
       white-space:pre-wrap;
@@ -1114,7 +1146,8 @@ function renderSongBodyHTML(body, chordModeOn, anchorPrefix=''){
         ? `<span class="chord${chordModeOn ? ' tappable' : ''}" ${chordModeOn ? `onclick="openChordSheet('${escapeHtml(tok.chord).replace(/'/g,"\\'")}')"` : ''}>${escapeHtml(tok.chord)}</span>`
         : '';
       const lyricText = tok.text === '' ? '\u00A0' : tok.text;
-      lineHtml += `<span class="cl-unit">${chordHtml}<span class="lyric">${escapeHtml(lyricText)}</span></span>`;
+      const wideChordClass = tok.chord && tok.chord.length > tok.text.trim().length ? ' chord-wide' : '';
+      lineHtml += `<span class="cl-unit${tok.chord ? ' has-chord' : ''}${wideChordClass}">${chordHtml}<span class="lyric">${escapeHtml(lyricText)}</span></span>`;
     });
     lineHtml += `</div>`;
     html += lineHtml;
