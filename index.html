@@ -119,8 +119,14 @@
 
   /* ---------- Continuous set-list view ---------- */
   .continuous-topbar{
-    position:sticky; top:0; z-index:20; margin:-8px -8px 24px; padding:8px;
+    margin:-8px -8px 10px; padding:8px;
     background:linear-gradient(to bottom, rgba(18,33,29,0.99) 84%, rgba(18,33,29,0));
+  }
+  .continuous-sticky-nav{
+    position:sticky; top:0; z-index:20; margin:0 -8px 24px; padding:8px;
+    background:linear-gradient(to bottom, rgba(18,33,29,0.99) 90%, rgba(18,33,29,0.96));
+    border-bottom:1px solid rgba(237,230,214,0.08);
+    box-shadow:0 8px 18px rgba(6,12,10,0.18);
   }
   .continuous-topbar-row{ display:flex; align-items:center; gap:10px; }
   .continuous-title{ min-width:0; flex:1; }
@@ -134,7 +140,7 @@
   .continuous-intro{ margin-bottom:28px; }
   .continuous-intro h1{ font-family:'Fraunces', serif; font-size:29px; margin:0 0 5px; }
   .continuous-intro p{ color:var(--ink-dim); font-size:13px; line-height:1.5; margin:0; }
-  .set-song-page{ scroll-margin-top:72px; padding:4px 0 54px; margin-bottom:46px; border-bottom:1px solid var(--line); }
+  .set-song-page{ scroll-margin-top:150px; padding:4px 0 54px; margin-bottom:46px; border-bottom:1px solid var(--line); }
   .set-song-page:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:20px; }
   .set-song-position{
     display:inline-flex; align-items:center; gap:7px; color:var(--gold);
@@ -213,7 +219,39 @@
   }
   .song-jump-btn:hover, .song-jump-btn:active{ color:var(--gold); border-color:var(--gold); background:var(--gold-dim); }
   .song-jump-btn.next{ color:var(--gold); }
-  .section-label{ scroll-margin-top:138px; }
+
+  /* Sticky section navigation shown beneath the sticky song strip. */
+  .sticky-section-nav{
+    margin-top:7px; padding-top:7px; border-top:1px solid var(--line); min-width:0;
+  }
+  .sticky-section-current{
+    display:flex; align-items:center; gap:7px; min-width:0; margin-bottom:6px;
+  }
+  .sticky-section-current span{
+    flex-shrink:0; color:var(--gold); font-family:'JetBrains Mono', monospace;
+    font-size:9px; letter-spacing:0.07em; text-transform:uppercase;
+  }
+  .sticky-section-current strong{
+    min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    color:var(--ink); font-family:'Fraunces', serif; font-size:13px;
+  }
+  .sticky-section-buttons{
+    display:flex; align-items:center; gap:6px; overflow-x:auto; padding-bottom:2px;
+    scrollbar-width:none; scroll-behavior:smooth;
+  }
+  .sticky-section-buttons::-webkit-scrollbar{ display:none; }
+  .sticky-section-btn{
+    flex:0 0 auto; border:1px solid var(--line); background:rgba(27,46,39,0.96);
+    color:var(--ink-dim); border-radius:999px; padding:6px 10px; font-size:11px;
+    white-space:nowrap;
+  }
+  .sticky-section-btn:hover, .sticky-section-btn:active, .sticky-section-btn.active{
+    color:#1B2E27; border-color:var(--gold); background:var(--gold); font-weight:700;
+  }
+  .sticky-section-btn.next{ color:var(--gold); }
+  .sticky-section-btn.next:hover, .sticky-section-btn.next:active{ color:#1B2E27; }
+  .sticky-section-empty{ color:var(--ink-dim); font-size:11px; padding:3px 0; }
+  .section-label{ scroll-margin-top:170px; }
 
   /* ---------- Library ---------- */
   .song-list{ display:flex; flex-direction:column; gap:10px; }
@@ -375,6 +413,14 @@
       overflow-wrap:anywhere;
       word-break:normal;
     }
+
+    .continuous-topbar{ margin-left:-4px; margin-right:-4px; }
+    .continuous-topbar-row{ gap:7px; }
+    .continuous-title strong{ font-size:14px; }
+    .continuous-chord-toggle{ min-height:36px; padding:0 8px; font-size:10.5px; }
+    .set-overview-chip{ max-width:165px; }
+    .sticky-section-current{ margin-bottom:5px; }
+    .sticky-section-btn{ padding:6px 9px; font-size:10.5px; }
 
     /* Keep generated transition progressions readable in portrait mode too. */
     .transition-progression{
@@ -967,7 +1013,7 @@ function renderSongBodyHTML(body, chordModeOn, anchorPrefix=''){
     if(trimmed===''){ html += `<div class="blank-line"></div>`; return; }
     const sectionMatch = trimmed.match(/^\{(.+)\}$/);
     if(sectionMatch){
-      const anchor = anchorPrefix ? ` id="section-${escapeAttr(anchorPrefix)}-${sectionIndex}"` : '';
+      const anchor = anchorPrefix ? ` id="section-${escapeAttr(anchorPrefix)}-${sectionIndex}" data-section-song="${escapeAttr(anchorPrefix)}" data-section-index="${sectionIndex}"` : '';
       html += `<div class="section-label"${anchor}>${escapeHtml(sectionMatch[1])}</div>`;
       sectionIndex += 1;
       return;
@@ -997,6 +1043,26 @@ function renderSongJumpControls(song, nextSong){
     ? `<button class="song-jump-btn next" onclick="jumpToSetSong('${nextSong.id}')">Next song &rarr;</button>`
     : '';
   return `<div class="song-jump-bar"><span class="song-jump-label">Jump</span>${sectionButtons}${nextButton}</div>`;
+}
+
+function renderStickySectionNavHTML(song, nextSong){
+  if(!song) return '';
+  const sections = extractSongSections(song.body);
+  const buttons = sections.map((label,index)=>
+    `<button class="sticky-section-btn" data-sticky-section-index="${index}" onclick="jumpToSongSection('${song.id}',${index})">${escapeHtml(label)}</button>`
+  ).join('');
+  const nextButton = nextSong
+    ? `<button class="sticky-section-btn next" onclick="jumpToSetSong('${nextSong.id}')">Next song &rarr;</button>`
+    : '';
+  const controls = buttons || nextButton
+    ? `<div class="sticky-section-buttons">${buttons}${nextButton}</div>`
+    : `<div class="sticky-section-empty">No labeled sections in this song.</div>`;
+  return `
+    <div class="sticky-section-current">
+      <span>Current song</span>
+      <strong>${escapeHtml(song.title)}</strong>
+    </div>
+    ${controls}`;
 }
 
 /* ============================= STORAGE ============================= */
@@ -1405,6 +1471,9 @@ function renderContinuousSetlistView(){
   }
 
   const initialActiveId = state.setlistScrollTarget || setSongs[0].id;
+  const initialActiveIndex = Math.max(0, setSongs.findIndex(song=>song.id===initialActiveId));
+  const initialActiveSong = setSongs[initialActiveIndex] || setSongs[0];
+  const initialNextSong = setSongs[initialActiveIndex+1] || null;
   const overviewHtml = setSongs.map((song,index)=>`
     <button class="set-overview-chip ${song.id===initialActiveId?'active':''}" data-set-chip="${song.id}" onclick="jumpToSetSong('${song.id}')" title="Jump to ${escapeAttr(song.title)}">
       <span class="num">${index+1}.</span>${escapeHtml(song.title)}
@@ -1441,7 +1510,6 @@ function renderContinuousSetlistView(){
             <button class="transpose-btn" onclick="changeSetlistTranspose('${song.id}',1)">&plus;</button>
           </div>
         </div>
-        ${renderSongJumpControls(song, nextSong)}
         <div class="song-body">${renderSongBodyHTML(transposedBody, state.chordMode, song.id)}</div>
         ${nextSong ? renderTransitionCard(displayKey, nextDisplayKey, nextSong.title) : `<div class="set-song-next"><strong>End of this Sunday’s set</strong></div>`}
       </section>`;
@@ -1461,11 +1529,16 @@ function renderContinuousSetlistView(){
           ${state.chordMode ? 'Chord diagrams on' : 'Chord diagrams off'}
         </button>
       </div>
-      <div class="set-overview" aria-label="Set list song navigation">${overviewHtml}</div>
     </div>
     <div class="continuous-intro">
       <h1>Sunday Set List</h1>
-      <p>Use the song strip or section buttons to jump instantly. Scroll continuously through all ${setSongs.length} song${setSongs.length===1?'':'s'} in the saved order.</p>
+      <p>The set header and chord-diagram control scroll away. The song and section navigation stay available while you move through the music.</p>
+    </div>
+    <div class="continuous-sticky-nav" aria-label="Set list navigation">
+      <div class="set-overview" aria-label="Set list song navigation">${overviewHtml}</div>
+      <div class="sticky-section-nav" id="sticky-section-nav" aria-label="Current song section navigation">
+        ${renderStickySectionNavHTML(initialActiveSong, initialNextSong)}
+      </div>
     </div>
     ${pagesHtml}
   `;
@@ -2347,14 +2420,53 @@ function teardownSetlistScrollTracking(){
   activeTrackedSongId = null;
 }
 
+function getOrderedSetSongs(){
+  return state.sundaySetlist
+    .map(id=>state.songs.find(song=>song.id===id))
+    .filter(Boolean);
+}
+
+function updateStickySectionNav(songId){
+  const nav = document.getElementById('sticky-section-nav');
+  if(!nav) return;
+  const setSongs = getOrderedSetSongs();
+  const index = setSongs.findIndex(song=>song.id===songId);
+  if(index<0) return;
+  nav.innerHTML = renderStickySectionNavHTML(setSongs[index], setSongs[index+1] || null);
+  nav.dataset.activeSongId = songId;
+}
+
 function setActiveOverviewChip(songId){
-  if(!songId || songId===activeTrackedSongId) return;
+  if(!songId) return;
+  const changed = songId !== activeTrackedSongId;
   activeTrackedSongId = songId;
   document.querySelectorAll('[data-set-chip]').forEach(chip=>{
     chip.classList.toggle('active', chip.dataset.setChip === songId);
   });
-  const active = document.querySelector(`[data-set-chip="${CSS.escape(songId)}"]`);
+  if(changed){
+    const active = document.querySelector(`[data-set-chip="${CSS.escape(songId)}"]`);
+    if(active) active.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+    updateStickySectionNav(songId);
+  }
+}
+
+function setActiveStickySection(sectionIndex){
+  document.querySelectorAll('#sticky-section-nav [data-sticky-section-index]').forEach(button=>{
+    button.classList.toggle('active', Number(button.dataset.stickySectionIndex)===sectionIndex);
+  });
+  const active = document.querySelector('#sticky-section-nav .sticky-section-btn.active');
   if(active) active.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+function getStickyHeaderOffset(){
+  const stickyNav = document.querySelector('.continuous-sticky-nav');
+  return (stickyNav ? stickyNav.offsetHeight : 150) + 10;
+}
+
+function scrollToSetTarget(target, behavior='smooth'){
+  if(!target) return;
+  const top = target.getBoundingClientRect().top + window.scrollY - getStickyHeaderOffset();
+  window.scrollTo({top:Math.max(0, top), behavior});
 }
 
 function setupSetlistScrollTracking(){
@@ -2362,13 +2474,33 @@ function setupSetlistScrollTracking(){
   const update = ()=>{
     const pages = [...document.querySelectorAll('.set-song-page')];
     if(!pages.length) return;
-    const marker = Math.min(180, window.innerHeight * 0.28);
+    const marker = getStickyHeaderOffset() + 16;
     let active = pages[0];
-    for(const page of pages){
-      if(page.getBoundingClientRect().top <= marker) active = page;
-      else break;
+    const atPageBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+    if(atPageBottom){
+      // The final song can be shorter than the viewport, which means its top may
+      // never reach the sticky marker. At the bottom of the set, always identify
+      // the final song as current so its title and section buttons are shown.
+      active = pages[pages.length - 1];
+    } else {
+      for(const page of pages){
+        if(page.getBoundingClientRect().top <= marker) active = page;
+        else break;
+      }
     }
-    setActiveOverviewChip(active.dataset.setSongId);
+    const songId = active.dataset.setSongId;
+    setActiveOverviewChip(songId);
+
+    let activeSection = -1;
+    const sections = [...active.querySelectorAll('.section-label[data-section-index]')];
+    for(const section of sections){
+      if(section.getBoundingClientRect().top <= marker + 8){
+        activeSection = Number(section.dataset.sectionIndex);
+      } else {
+        break;
+      }
+    }
+    setActiveStickySection(activeSection);
   };
   let ticking = false;
   setlistScrollHandler = ()=>{
@@ -2383,14 +2515,18 @@ function setupSetlistScrollTracking(){
 function jumpToSetSong(id){
   const target = document.getElementById(`set-song-${id}`);
   if(target){
-    target.scrollIntoView({behavior:'smooth', block:'start'});
     setActiveOverviewChip(id);
+    scrollToSetTarget(target);
   }
 }
 
 function jumpToSongSection(songId, sectionIndex){
   const target = document.getElementById(`section-${songId}-${sectionIndex}`);
-  if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  if(target){
+    setActiveOverviewChip(songId);
+    setActiveStickySection(sectionIndex);
+    scrollToSetTarget(target);
+  }
 }
 
 async function toggleSetlistLock(){
