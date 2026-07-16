@@ -430,6 +430,95 @@
   }
 
   .hidden{ display:none !important; }
+
+
+  /* ---------- Desktop / tablet bulk ChordPro importer ---------- */
+  .bulk-only{ display:none; }
+  .bulk-import-shell{ max-width:1040px; margin:0 auto; }
+  .bulk-intro{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; margin-bottom:16px;
+  }
+  .bulk-intro h2{ font-family:'Fraunces',serif; margin:0 0 5px; font-size:25px; }
+  .bulk-intro p{ color:var(--ink-dim); font-size:13px; line-height:1.55; margin:0; }
+  .bulk-picker-row{ display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 10px; }
+  .bulk-file-label{
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    min-height:42px; padding:10px 16px; border-radius:999px; cursor:pointer;
+    font-size:13px; font-weight:700; background:var(--gold); color:#1B2E27;
+  }
+  .bulk-file-label.secondary{ background:var(--surface-alt); color:var(--ink); border:1px solid var(--line); }
+  .bulk-file-label input{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+  .bulk-drop-zone{
+    border:1px dashed rgba(212,175,106,.48); background:var(--gold-dim);
+    border-radius:var(--radius); padding:24px 18px; text-align:center;
+    color:var(--ink-dim); font-size:13px; transition:.15s ease;
+  }
+  .bulk-drop-zone.dragging{ border-color:var(--gold); background:rgba(212,175,106,.24); color:var(--ink); }
+  .bulk-drop-zone strong{ color:var(--ink); display:block; margin-bottom:3px; }
+  .bulk-summary{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:12px 14px; margin:16px 0 10px;
+  }
+  .bulk-summary-counts{ display:flex; gap:7px; flex-wrap:wrap; }
+  .bulk-pill{ font-size:11px; padding:5px 8px; border-radius:999px; background:var(--surface-alt); color:var(--ink-dim); }
+  .bulk-pill.good{ color:#B9D7C5; }
+  .bulk-pill.warn{ color:#E1C886; }
+  .bulk-pill.bad{ color:#D98A8E; }
+  .bulk-summary-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .bulk-small-btn{
+    border:1px solid var(--line); background:var(--surface-alt); color:var(--ink);
+    border-radius:999px; padding:7px 10px; font-size:11px;
+  }
+  .bulk-list{ display:flex; flex-direction:column; gap:10px; }
+  .bulk-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px; display:grid; grid-template-columns:auto minmax(210px,1.25fr) 100px minmax(180px,.9fr); gap:12px;
+    align-items:start;
+  }
+  .bulk-card.error{ border-color:rgba(193,102,107,.55); }
+  .bulk-card.warning{ border-color:rgba(212,175,106,.42); }
+  .bulk-check{ padding-top:26px; }
+  .bulk-check input{ width:18px; height:18px; accent-color:var(--gold); }
+  .bulk-field label{ display:block; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:5px; }
+  .bulk-field input,.bulk-field select,.bulk-preview-body{
+    width:100%; background:var(--surface-alt); color:var(--ink); border:1px solid var(--line);
+    border-radius:8px; padding:9px 10px; outline:none; font-size:13px;
+  }
+  .bulk-field input:focus,.bulk-field select:focus,.bulk-preview-body:focus{ border-color:var(--gold); }
+  .bulk-file-name{ font-family:'JetBrains Mono',monospace; color:var(--ink-dim); font-size:10px; margin-top:6px; overflow-wrap:anywhere; }
+  .bulk-status{ font-size:11px; line-height:1.45; color:var(--ink-dim); padding-top:22px; }
+  .bulk-status strong{ display:block; color:var(--ink); margin-bottom:3px; }
+  .bulk-status .warning-text{ color:#E1C886; }
+  .bulk-status .error-text{ color:#D98A8E; }
+  .bulk-card-details{ grid-column:2 / -1; }
+  .bulk-card-details summary{ cursor:pointer; color:var(--gold); font-size:11px; }
+  .bulk-preview-body{ font-family:'JetBrains Mono',monospace; min-height:150px; line-height:1.6; margin-top:9px; resize:vertical; }
+  .bulk-import-footer{
+    position:sticky; bottom:12px; z-index:20; display:flex; justify-content:flex-end; gap:10px;
+    margin-top:18px; padding:12px; border-radius:999px; background:rgba(27,46,39,.94);
+    border:1px solid var(--line); backdrop-filter:blur(10px); box-shadow:0 12px 32px rgba(0,0,0,.28);
+  }
+  .bulk-import-footer button{ min-height:42px; }
+  .bulk-progress{ flex:1; align-self:center; min-width:140px; color:var(--ink-dim); font-size:12px; padding-left:8px; }
+  .bulk-result-banner{ padding:12px 14px; border-radius:10px; margin:12px 0; font-size:13px; line-height:1.5; }
+  .bulk-result-banner.success{ background:rgba(84,142,108,.2); border:1px solid rgba(118,182,143,.35); }
+  .bulk-result-banner.error{ background:rgba(193,102,107,.16); border:1px solid rgba(193,102,107,.4); }
+
+  @media (min-width:700px){
+    .bulk-only{ display:inline-flex; }
+    .app:has(.bulk-import-shell){ max-width:1080px; }
+  }
+  @media (max-width:699px){
+    .bulk-import-shell{ display:none; }
+  }
+  @media (max-width:900px){
+    .bulk-card{ grid-template-columns:auto minmax(220px,1fr) 100px; }
+    .bulk-status{ grid-column:2 / -1; padding-top:0; }
+    .bulk-card-details{ grid-column:2 / -1; }
+  }
+
 </style>
 </head>
 <body>
@@ -1075,7 +1164,8 @@ const SHARED = true;
 // for browser use; access is still controlled by the table's RLS policies.
 const SUPABASE_URL = 'https://nwikupipvwgjzjburwia.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_cmxhMF5Y_iZ9yuP_3ELvhw_EGd3LMn8';
-const SUPABASE_TABLE = 'app_storage';
+const SUPABASE_STORAGE_TABLE = 'app_storage';
+const SUPABASE_SONGS_TABLE = 'songs';
 
 let storageStatus = 'connecting'; // connecting | cloud | local
 let storageStatusDetail = '';
@@ -1095,7 +1185,11 @@ function updateStorageStatus(mode, detail=''){
 }
 
 function supabaseEndpoint(query=''){
-  return `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}${query}`;
+  return `${SUPABASE_URL}/rest/v1/${SUPABASE_STORAGE_TABLE}${query}`;
+}
+
+function supabaseSongsEndpoint(query=''){
+  return `${SUPABASE_URL}/rest/v1/${SUPABASE_SONGS_TABLE}${query}`;
 }
 
 async function readSupabaseValue(key){
@@ -1232,19 +1326,169 @@ How [G]precious [G7]did that [C]grace ap[G]pear
 The [Em]hour I [D]first be[G]lieved`
 }];
 
-async function loadSongs(){
+function songRowToModel(row){
+  return {
+    id:String(row.id),
+    title:String(row.title || '').trim(),
+    key:String(row.song_key || 'C'),
+    body:String(row.body || ''),
+    sourceFilename:row.source_filename || '',
+    sourceFormat:row.source_format || 'manual',
+    createdAt:row.created_at || '',
+    updatedAt:row.updated_at || ''
+  };
+}
+
+function songModelToRow(song, extra={}){
+  return {
+    title:String(song.title || '').trim(),
+    song_key:String(song.key || 'C'),
+    body:String(song.body || ''),
+    source_filename:extra.sourceFilename !== undefined ? (extra.sourceFilename || null) : (song.sourceFilename || null),
+    source_format:extra.sourceFormat || song.sourceFormat || 'manual'
+  };
+}
+
+async function requestSongsTable(query='', options={}){
+  const response = await fetch(supabaseSongsEndpoint(query), {
+    method:options.method || 'GET',
+    headers:{
+      apikey:SUPABASE_PUBLISHABLE_KEY,
+      Accept:'application/json',
+      ...(options.body !== undefined ? {'Content-Type':'application/json'} : {}),
+      ...(options.prefer ? {Prefer:options.prefer} : {})
+    },
+    body:options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    cache:'no-store'
+  });
+  if(!response.ok){
+    const message = await response.text();
+    throw new Error(`Songs table request failed (${response.status}): ${message}`);
+  }
+  updateStorageStatus('cloud');
+  if(response.status === 204) return null;
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function fetchSongRows(){
+  const rows = await requestSongsTable('?select=id,title,song_key,body,source_filename,source_format,created_at,updated_at&order=title.asc');
+  return (rows || []).map(songRowToModel);
+}
+
+async function createSongRecord(song, extra={}){
+  const rows = await requestSongsTable('?select=id,title,song_key,body,source_filename,source_format,created_at,updated_at', {
+    method:'POST',
+    prefer:'return=representation',
+    body:songModelToRow(song, extra)
+  });
+  if(!rows || !rows[0]) throw new Error('Supabase did not return the newly created song.');
+  return songRowToModel(rows[0]);
+}
+
+async function updateSongRecord(id, song, extra={}){
+  const rows = await requestSongsTable(`?id=eq.${encodeURIComponent(id)}&select=id,title,song_key,body,source_filename,source_format,created_at,updated_at`, {
+    method:'PATCH',
+    prefer:'return=representation',
+    body:songModelToRow(song, extra)
+  });
+  if(!rows || !rows[0]) throw new Error('The song could not be updated. It may have been removed on another device.');
+  return songRowToModel(rows[0]);
+}
+
+async function deleteSongRecord(id){
+  await requestSongsTable(`?id=eq.${encodeURIComponent(id)}`, {
+    method:'DELETE',
+    prefer:'return=minimal'
+  });
+}
+
+async function insertSongRecords(songs){
+  if(!songs.length) return [];
+  const rows = await requestSongsTable('?select=id,title,song_key,body,source_filename,source_format,created_at,updated_at', {
+    method:'POST',
+    prefer:'return=representation',
+    body:songs.map(song => songModelToRow(song, {
+      sourceFilename:song.sourceFilename || '',
+      sourceFormat:song.sourceFormat || 'chordpro'
+    }))
+  });
+  return (rows || []).map(songRowToModel);
+}
+
+let legacySongIdMap = {};
+let legacySongSnapshot = [];
+
+async function readLegacySongLibrary(){
   const serialized = await loadStorageValue(STORAGE_KEY);
-  if(serialized === null) return null;
+  if(serialized === null) return [];
   try{
-    return JSON.parse(serialized);
+    const parsed = JSON.parse(serialized);
+    return Array.isArray(parsed) ? parsed : [];
   }catch(error){
-    console.error('Stored song library is not valid JSON', error);
-    return null;
+    console.warn('Previous combined song library is not valid JSON', error);
+    return [];
   }
 }
 
-async function saveSongs(songs){
-  return saveStorageValue(STORAGE_KEY, JSON.stringify(songs));
+function matchMigratedRowsToLegacy(legacySongs, insertedSongs){
+  const unused = insertedSongs.slice();
+  const map = {};
+  legacySongs.forEach(oldSong => {
+    let index = unused.findIndex(newSong =>
+      newSong.title.trim().toLowerCase() === String(oldSong.title || '').trim().toLowerCase() &&
+      newSong.body === String(oldSong.body || '')
+    );
+    if(index < 0){
+      index = unused.findIndex(newSong =>
+        newSong.title.trim().toLowerCase() === String(oldSong.title || '').trim().toLowerCase()
+      );
+    }
+    if(index >= 0){
+      const [matched] = unused.splice(index,1);
+      map[String(oldSong.id)] = matched.id;
+    }
+  });
+  return map;
+}
+
+async function migrateLegacySongsIfNeeded(){
+  const existing = await fetchSongRows();
+  if(existing.length) return existing;
+
+  const legacy = await readLegacySongLibrary();
+  legacySongSnapshot = legacy;
+  if(!legacy.length) return [];
+
+  const migrationRows = legacy
+    .filter(song => String(song.title || '').trim())
+    .map(song => ({
+      title:String(song.title || '').trim(),
+      key:String(song.key || 'C'),
+      body:String(song.body || ''),
+      sourceFilename:'',
+      sourceFormat:'manual'
+    }));
+  const inserted = await insertSongRecords(migrationRows);
+  legacySongIdMap = matchMigratedRowsToLegacy(legacy, inserted);
+  return inserted.sort((a,b)=>a.title.localeCompare(b.title));
+}
+
+async function loadSongs(){
+  try{
+    return await migrateLegacySongsIfNeeded();
+  }catch(error){
+    console.error('Could not load the songs table', error);
+    updateStorageStatus('local', error.message);
+    // A read-only browser fallback keeps the current device usable if Supabase
+    // is temporarily unavailable. Song edits require the cloud table.
+    const legacy = await readLegacySongLibrary();
+    legacySongSnapshot = legacy;
+    return legacy.map(song => ({
+      id:String(song.id), title:String(song.title || ''), key:String(song.key || 'C'), body:String(song.body || ''),
+      sourceFilename:'', sourceFormat:'manual'
+    }));
+  }
 }
 
 
@@ -1308,7 +1552,7 @@ async function saveSundaySetlist(){
 /* ============================= APP STATE ============================= */
 
 let state = {
-  view: 'library',       // library | song | setlist | form
+  view: 'library',       // library | song | setlist | form | bulk
   songs: [],
   sundaySetlist: [],
   setlistNotes: {},
@@ -1321,10 +1565,12 @@ let state = {
   chordMode: false,
   editingId: null,
   formReturnView: 'library',
-  loading: true
+  loading: true,
+  bulkFiles: [],
+  bulkImporting: false,
+  bulkResult: null
 };
 
-function uid(){ return 's' + Date.now() + Math.random().toString(36).slice(2,7); }
 
 /* ============================= RENDER ============================= */
 
@@ -1340,6 +1586,7 @@ function render(){
   if(state.view === 'song') return renderSongView();
   if(state.view === 'setlist') return renderContinuousSetlistView();
   if(state.view === 'form') return renderFormView();
+  if(state.view === 'bulk') return renderBulkImportView();
 }
 
 function setlistOptionLabel(song){
@@ -1450,6 +1697,10 @@ function renderLibraryView(){
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A9B8AE" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input id="library-search" type="text" placeholder="Search all songs…" value="${escapeAttr(state.search)}" oninput="onSearch(this.value)">
       </div>
+      <button class="btn-secondary bulk-only" style="flex:0 0 auto; padding:0 16px; min-height:42px;" onclick="openBulkImport()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 14v5h14v-5"/></svg>
+        Bulk import
+      </button>
       <button class="btn-gold" onclick="openForm()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B2E27" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
         Add song
@@ -1638,6 +1889,491 @@ function renderFormView(){
       <button class="btn-primary" onclick="saveForm()">Save song</button>
     </div>
   `;
+}
+
+
+/* ============================= BULK CHORDPRO IMPORT ============================= */
+
+const CHORDPRO_EXTENSIONS = new Set(['cho','chopro','chordpro','pro','crd','txt']);
+
+function normalizeSongTitle(title){
+  return String(title || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[’‘`]/g,"'")
+    .toLowerCase()
+    .replace(/&/g,' and ')
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim()
+    .replace(/\s+/g,' ');
+}
+
+function titleFromFilename(filename){
+  return String(filename || '')
+    .replace(/\.[^.]+$/,'')
+    .replace(/[_]+/g,' ')
+    .replace(/\s+-\s+/g,' - ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function normalizeImportedKey(rawKey){
+  const cleaned = normalizeMusicText(String(rawKey || '').trim())
+    .replace(/^key\s*[:=-]?\s*/i,'');
+  const match = cleaned.match(/^([A-Ga-g])([#b]?)(m|min|minor)?/);
+  if(!match) return { key:'', warning:'' };
+  const key = match[1].toUpperCase() + (match[2] || '');
+  return {
+    key:NOTE_INDEX[key] === undefined ? '' : PREFERRED_NAME[NOTE_INDEX[key]],
+    warning:match[3] ? `The file declares ${match[0]} as a minor key; the app currently stores its root as ${key}.` : ''
+  };
+}
+
+function chordProSectionName(name, value=''){
+  const directive = String(name || '').toLowerCase().replace(/-/g,'_');
+  const map = {
+    start_of_chorus:'Chorus', soc:'Chorus', chorus:'Chorus',
+    start_of_verse:'Verse', sov:'Verse', verse:'Verse',
+    start_of_bridge:'Bridge', sob:'Bridge', bridge:'Bridge',
+    start_of_intro:'Intro', soi:'Intro', intro:'Intro',
+    start_of_outro:'Outro', soo:'Outro', outro:'Outro',
+    start_of_prechorus:'Pre-Chorus', start_of_pre_chorus:'Pre-Chorus', sopc:'Pre-Chorus', prechorus:'Pre-Chorus',
+    start_of_interlude:'Interlude', interlude:'Interlude',
+    start_of_tag:'Tag', tag:'Tag',
+    start_of_refrain:'Refrain', refrain:'Refrain'
+  };
+  if(map[directive]){
+    if(!value) return map[directive];
+    return value.toLowerCase().startsWith(map[directive].toLowerCase()) ? value : `${map[directive]} ${value}`.trim();
+  }
+  return '';
+}
+
+function isChordProEndDirective(name){
+  const n = String(name || '').toLowerCase().replace(/-/g,'_');
+  return n.startsWith('end_of_') || ['eoc','eov','eob','eoi','eoo','eopc','end_of_grid','eog'].includes(n);
+}
+
+function parseChordProFileText(rawText, filename=''){
+  const normalized = normalizeMusicText(String(rawText || ''))
+    .replace(/^\uFEFF/,'')
+    .replace(/\r\n?/g,'\n');
+  const lines = normalized.split('\n');
+  const bodyLines = [];
+  const warnings = [];
+  const ignoredDirectives = [];
+  let title = '';
+  let key = '';
+  let inTabBlock = false;
+
+  for(const originalLine of lines){
+    const line = originalLine.replace(/\t/g,'    ');
+    const trimmed = line.trim();
+    const exactDirective = trimmed.match(/^\{\s*([^}:]+?)\s*(?::\s*(.*?))?\s*\}$/);
+
+    if(exactDirective){
+      const rawName = exactDirective[1].trim();
+      const name = rawName.toLowerCase().replace(/\s+/g,'_').replace(/-/g,'_');
+      const value = (exactDirective[2] || '').trim();
+
+      if(['title','t'].includes(name)){ title = value || title; continue; }
+      if(['key','k'].includes(name)){
+        const normalizedKey = normalizeImportedKey(value);
+        key = normalizedKey.key || key;
+        if(normalizedKey.warning) warnings.push(normalizedKey.warning);
+        continue;
+      }
+      if(['start_of_tab','sot'].includes(name)){ inTabBlock = true; continue; }
+      if(['end_of_tab','eot'].includes(name)){ inTabBlock = false; continue; }
+      if(isChordProEndDirective(name)) continue;
+
+      const section = chordProSectionName(name, value);
+      if(section){ bodyLines.push(`{${section}}`); continue; }
+
+      if(['comment','c','comment_italic','ci','comment_box','cb'].includes(name)){
+        if(value){
+          const cleanedSection = getSectionLabel(value) || value.replace(/^\[|\]$/g,'').trim();
+          bodyLines.push(`{${cleanedSection}}`);
+        }
+        continue;
+      }
+
+      if(['new_page','np','column_break','colb','new_song','ns'].includes(name)){
+        if(bodyLines.length && bodyLines[bodyLines.length-1] !== '') bodyLines.push('');
+        continue;
+      }
+
+      // Metadata and rendering directives do not belong in the chord sheet.
+      if([
+        'subtitle','st','artist','composer','lyricist','copyright','album','year','tempo','time','duration','capo',
+        'meta','define','textfont','textsize','chordfont','chordsize','grid','no_grid','columns','col','start_of_grid','sog'
+      ].includes(name)){
+        ignoredDirectives.push(rawName);
+        continue;
+      }
+
+      // Preserve unfamiliar directives as a warning instead of rendering code into the song.
+      ignoredDirectives.push(rawName);
+      continue;
+    }
+
+    if(inTabBlock){
+      if(trimmed) bodyLines.push(line);
+      continue;
+    }
+
+    // ChordPro's native [Chord]lyric syntax is already the app's preferred syntax.
+    bodyLines.push(line.replace(/\\\[/g,'[').replace(/\\\]/g,']'));
+  }
+
+  let body = bodyLines
+    .join('\n')
+    .replace(/[ \t]+$/gm,'')
+    .replace(/\n{3,}/g,'\n\n')
+    .trim();
+
+  // Some .txt/.pro downloads are ordinary website charts rather than strict
+  // ChordPro. Reuse the proven paste parser when no bracket chords were found.
+  if(!/\[[A-G][^\]]*\]/i.test(body)){
+    const fallback = formatPastedChordSheet(normalized);
+    if(fallback.body && fallback.chordCount){
+      body = fallback.body;
+      if(!title && fallback.title) title = fallback.title;
+      if(!key && fallback.key) key = fallback.key;
+      warnings.push('This file was imported as an aligned text chord chart rather than strict ChordPro.');
+    }
+  }
+
+  const chordSymbols = [...body.matchAll(/\[([^\]]+)\]/g)]
+    .map(match => match[1].trim())
+    .filter(isChordToken);
+  if(!key) key = inferKeyFromChords(chordSymbols) || 'C';
+  if(!title) title = titleFromFilename(filename);
+
+  if(ignoredDirectives.length){
+    const unique = [...new Set(ignoredDirectives)].slice(0,8);
+    warnings.push(`Ignored ${unique.length} non-song directive${unique.length===1?'':'s'}: ${unique.join(', ')}${ignoredDirectives.length>8?'…':''}`);
+  }
+  if(!chordSymbols.length) warnings.push('No recognizable bracketed chords were found. Review the preview before importing.');
+
+  return {
+    title:title.trim(),
+    key:key || 'C',
+    body,
+    chordCount:chordSymbols.length,
+    warnings
+  };
+}
+
+function getBulkDuplicate(item, index){
+  const normalized = normalizeSongTitle(item.title);
+  if(!normalized) return null;
+  const existing = state.songs.find(song => normalizeSongTitle(song.title) === normalized);
+  if(existing) return { type:'existing', id:existing.id, title:existing.title };
+  const earlier = state.bulkFiles.find((other, otherIndex) =>
+    otherIndex < index && other.parseStatus !== 'error' && normalizeSongTitle(other.title) === normalized
+  );
+  if(earlier) return { type:'batch', tempId:earlier.tempId, title:earlier.title };
+  return null;
+}
+
+function refreshBulkDuplicates(){
+  state.bulkFiles.forEach((item,index)=>{
+    item.duplicate = getBulkDuplicate(item,index);
+    if(item.duplicate){
+      const allowed = item.duplicate.type === 'existing' ? ['skip','replace','copy'] : ['skip','copy'];
+      if(!allowed.includes(item.duplicateAction)) item.duplicateAction = 'skip';
+    }else{
+      item.duplicateAction = 'import';
+    }
+  });
+}
+
+function bulkItemCanImport(item){
+  if(!item.selected || item.parseStatus === 'error' || !item.title.trim() || !item.body.trim()) return false;
+  if(item.duplicate && item.duplicateAction === 'skip') return false;
+  return true;
+}
+
+function bulkReviewCounts(){
+  const total = state.bulkFiles.length;
+  const errors = state.bulkFiles.filter(item=>item.parseStatus==='error').length;
+  const duplicates = state.bulkFiles.filter(item=>item.duplicate).length;
+  const selected = state.bulkFiles.filter(bulkItemCanImport).length;
+  return { total, errors, duplicates, selected };
+}
+
+function renderBulkCard(item,index){
+  const duplicate = item.duplicate;
+  const isError = item.parseStatus === 'error';
+  const warnings = item.warnings || [];
+  let duplicateControl = '<span>No duplicate found</span>';
+  if(duplicate){
+    const replaceOption = duplicate.type === 'existing'
+      ? `<option value="replace" ${item.duplicateAction==='replace'?'selected':''}>Replace existing song</option>`
+      : '';
+    duplicateControl = `
+      <select onchange="updateBulkDuplicateAction('${item.tempId}',this.value)">
+        <option value="skip" ${item.duplicateAction==='skip'?'selected':''}>Skip duplicate</option>
+        ${replaceOption}
+        <option value="copy" ${item.duplicateAction==='copy'?'selected':''}>Import another copy</option>
+      </select>`;
+  }
+
+  const statusText = isError
+    ? `<strong class="error-text">Could not parse</strong><span class="error-text">${escapeHtml(item.error || 'Unknown file error')}</span>`
+    : `<strong>${item.chordCount} chord${item.chordCount===1?'':'s'} detected</strong>
+       ${duplicate ? `<span class="warning-text">Matches ${duplicate.type==='existing'?'library song':'another selected file'} “${escapeHtml(duplicate.title)}”.</span>` : '<span>Ready for review.</span>'}
+       ${warnings.map(w=>`<span class="warning-text" style="display:block;margin-top:3px;">${escapeHtml(w)}</span>`).join('')}`;
+
+  return `
+    <div class="bulk-card ${isError?'error':(duplicate||warnings.length?'warning':'')}" data-bulk-card="${item.tempId}">
+      <div class="bulk-check"><input type="checkbox" ${item.selected&&!isError?'checked':''} ${isError?'disabled':''} onchange="toggleBulkItem('${item.tempId}',this.checked)" aria-label="Include ${escapeAttr(item.filename)}"></div>
+      <div class="bulk-field">
+        <label>Song title</label>
+        <input value="${escapeAttr(item.title)}" ${isError?'disabled':''} onchange="updateBulkField('${item.tempId}','title',this.value)">
+        <div class="bulk-file-name">${escapeHtml(item.filename)}</div>
+      </div>
+      <div class="bulk-field">
+        <label>Key</label>
+        <select ${isError?'disabled':''} onchange="updateBulkField('${item.tempId}','key',this.value)">
+          ${ALL_KEYS.map(key=>`<option value="${key}" ${item.key===key?'selected':''}>${key}</option>`).join('')}
+        </select>
+      </div>
+      <div class="bulk-field">
+        <label>${duplicate?'Duplicate action':'Status'}</label>
+        ${duplicate ? duplicateControl : `<div class="bulk-status" style="padding-top:8px;">${statusText}</div>`}
+      </div>
+      ${duplicate ? `<div class="bulk-status" style="grid-column:2 / -1;padding-top:0;">${statusText}</div>` : ''}
+      ${!isError ? `<details class="bulk-card-details">
+        <summary>Preview or correct converted chords and lyrics</summary>
+        <textarea class="bulk-preview-body" oninput="updateBulkField('${item.tempId}','body',this.value)">${escapeHtml(item.body)}</textarea>
+      </details>` : ''}
+    </div>`;
+}
+
+function renderBulkImportView(){
+  if(window.innerWidth < 700){
+    state.view = 'library';
+    render();
+    alert('Bulk ChordPro import is available on desktop and iPad-sized screens.');
+    return;
+  }
+  refreshBulkDuplicates();
+  const counts = bulkReviewCounts();
+  const resultBanner = state.bulkResult
+    ? `<div class="bulk-result-banner ${state.bulkResult.ok?'success':'error'}">${escapeHtml(state.bulkResult.message)}</div>`
+    : '';
+  const review = state.bulkFiles.length ? `
+    <div class="bulk-summary">
+      <div class="bulk-summary-counts">
+        <span class="bulk-pill">${counts.total} file${counts.total===1?'':'s'}</span>
+        <span class="bulk-pill good">${counts.selected} ready to import</span>
+        ${counts.duplicates?`<span class="bulk-pill warn">${counts.duplicates} duplicate${counts.duplicates===1?'':'s'}</span>`:''}
+        ${counts.errors?`<span class="bulk-pill bad">${counts.errors} error${counts.errors===1?'':'s'}</span>`:''}
+      </div>
+      <div class="bulk-summary-actions">
+        <button class="bulk-small-btn" onclick="setAllBulkSelection(true)">Select valid</button>
+        <button class="bulk-small-btn" onclick="setAllBulkSelection(false)">Deselect all</button>
+        <button class="bulk-small-btn" onclick="clearBulkFiles()">Clear files</button>
+      </div>
+    </div>
+    <div class="bulk-list">${state.bulkFiles.map(renderBulkCard).join('')}</div>
+    <div class="bulk-import-footer">
+      <div class="bulk-progress" id="bulk-progress">Review titles, keys, duplicates, and any warnings before importing.</div>
+      <button class="btn-secondary" style="flex:0 0 auto;" onclick="cancelBulkImport()" ${state.bulkImporting?'disabled':''}>Cancel</button>
+      <button class="btn-primary" style="flex:0 0 auto;" onclick="importReviewedChordProFiles()" ${counts.selected&&!state.bulkImporting?'':'disabled'}>${state.bulkImporting?'Importing…':`Import ${counts.selected} song${counts.selected===1?'':'s'}`}</button>
+    </div>` : '';
+
+  appEl.innerHTML = `
+    <div class="bulk-import-shell">
+      <div class="topbar">
+        <button class="icon-btn" onclick="cancelBulkImport()" aria-label="Back to library">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EDE6D6" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+      </div>
+      <section class="bulk-intro">
+        <h2>Bulk ChordPro Import</h2>
+        <p>Select individual ChordPro files or an entire folder. Nothing is saved until you review the converted titles, keys, lyrics, chords, and duplicate choices below.</p>
+        <div class="bulk-picker-row">
+          <label class="bulk-file-label">
+            <input type="file" multiple accept=".cho,.chopro,.chordpro,.pro,.crd,.txt,text/plain" onchange="handleBulkFileSelection(this.files);this.value=''">
+            Choose files
+          </label>
+          <label class="bulk-file-label secondary">
+            <input type="file" multiple webkitdirectory directory onchange="handleBulkFileSelection(this.files);this.value=''">
+            Choose folder
+          </label>
+        </div>
+        <div class="bulk-drop-zone" id="bulk-drop-zone" ondragenter="bulkDragEnter(event)" ondragover="bulkDragOver(event)" ondragleave="bulkDragLeave(event)" ondrop="bulkDrop(event)">
+          <strong>Or drag ChordPro files here</strong>
+          Supported: .cho, .chopro, .chordpro, .pro, .crd, and .txt
+        </div>
+        ${resultBanner}
+      </section>
+      ${review}
+    </div>`;
+}
+
+function openBulkImport(){
+  if(window.innerWidth < 700){
+    alert('Bulk ChordPro import is available on desktop and iPad-sized screens.');
+    return;
+  }
+  state.view = 'bulk';
+  state.bulkResult = null;
+  render();
+  window.scrollTo(0,0);
+}
+
+function cancelBulkImport(){
+  if(state.bulkImporting) return;
+  state.view = 'library';
+  state.bulkResult = null;
+  render();
+  window.scrollTo(0,0);
+}
+
+function getFileExtension(filename){
+  const match = String(filename || '').toLowerCase().match(/\.([^.]+)$/);
+  return match ? match[1] : '';
+}
+
+async function parseBulkFile(file){
+  const tempId = `bulk-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  const base = { tempId, filename:file.name, selected:true, duplicate:null, duplicateAction:'import' };
+  try{
+    const extension = getFileExtension(file.name);
+    if(!CHORDPRO_EXTENSIONS.has(extension)) throw new Error('Unsupported file type.');
+    if(file.size > 2 * 1024 * 1024) throw new Error('File is larger than 2 MB.');
+    const text = await file.text();
+    if(!text.trim()) throw new Error('File is empty.');
+    const parsed = parseChordProFileText(text,file.name);
+    if(!parsed.title) throw new Error('A song title could not be determined.');
+    if(!parsed.body) throw new Error('No lyrics or chord content was found.');
+    return { ...base, ...parsed, parseStatus:'ready', error:'' };
+  }catch(error){
+    return { ...base, title:titleFromFilename(file.name), key:'C', body:'', chordCount:0, warnings:[], parseStatus:'error', error:error.message, selected:false };
+  }
+}
+
+async function handleBulkFileSelection(fileList){
+  const files = [...(fileList || [])];
+  if(!files.length) return;
+  state.bulkResult = null;
+  const progress = document.getElementById('bulk-progress');
+  if(progress) progress.textContent = `Reading ${files.length} file${files.length===1?'':'s'}…`;
+  const parsed = [];
+  for(let index=0; index<files.length; index++){
+    if(progress) progress.textContent = `Reading ${index+1} of ${files.length}: ${files[index].name}`;
+    parsed.push(await parseBulkFile(files[index]));
+  }
+  const existingFileKeys = new Set(state.bulkFiles.map(item=>`${item.filename}|${item.body.length}`));
+  parsed.forEach(item=>{
+    const key = `${item.filename}|${item.body.length}`;
+    if(!existingFileKeys.has(key)){
+      state.bulkFiles.push(item);
+      existingFileKeys.add(key);
+    }
+  });
+  refreshBulkDuplicates();
+  render();
+}
+
+function bulkDragEnter(event){ event.preventDefault(); document.getElementById('bulk-drop-zone')?.classList.add('dragging'); }
+function bulkDragOver(event){ event.preventDefault(); if(event.dataTransfer) event.dataTransfer.dropEffect='copy'; }
+function bulkDragLeave(event){
+  event.preventDefault();
+  if(event.currentTarget && !event.currentTarget.contains(event.relatedTarget)) event.currentTarget.classList.remove('dragging');
+}
+function bulkDrop(event){
+  event.preventDefault();
+  event.currentTarget.classList.remove('dragging');
+  handleBulkFileSelection(event.dataTransfer?.files || []);
+}
+
+function updateBulkField(tempId, field, value){
+  const item = state.bulkFiles.find(row=>row.tempId===tempId);
+  if(!item) return;
+  item[field] = value;
+  if(field === 'title'){
+    refreshBulkDuplicates();
+    render();
+  }
+}
+
+function updateBulkDuplicateAction(tempId, value){
+  const item = state.bulkFiles.find(row=>row.tempId===tempId);
+  if(item){ item.duplicateAction = value; render(); }
+}
+
+function toggleBulkItem(tempId, checked){
+  const item = state.bulkFiles.find(row=>row.tempId===tempId);
+  if(item){ item.selected = checked; render(); }
+}
+
+function setAllBulkSelection(selected){
+  state.bulkFiles.forEach(item=>{ item.selected = selected && item.parseStatus !== 'error'; });
+  render();
+}
+
+function clearBulkFiles(){
+  if(state.bulkImporting) return;
+  state.bulkFiles = [];
+  state.bulkResult = null;
+  render();
+}
+
+async function importReviewedChordProFiles(){
+  if(state.bulkImporting) return;
+  refreshBulkDuplicates();
+  const items = state.bulkFiles.filter(bulkItemCanImport);
+  if(!items.length) return;
+  state.bulkImporting = true;
+  state.bulkResult = null;
+  render();
+
+  const progress = document.getElementById('bulk-progress');
+  let imported = 0;
+  let replaced = 0;
+  const failures = [];
+  const newModels = [];
+
+  for(let index=0; index<items.length; index++){
+    const item = items[index];
+    if(progress) progress.textContent = `Saving ${index+1} of ${items.length}: ${item.title}`;
+    try{
+      const song = { title:item.title.trim(), key:item.key || 'C', body:item.body, sourceFilename:item.filename, sourceFormat:'chordpro' };
+      if(item.duplicate?.type === 'existing' && item.duplicateAction === 'replace'){
+        const updated = await updateSongRecord(item.duplicate.id, song, {sourceFilename:item.filename,sourceFormat:'chordpro'});
+        const stateIndex = state.songs.findIndex(existing=>existing.id===updated.id);
+        if(stateIndex >= 0) state.songs[stateIndex] = updated;
+        replaced++;
+      }else{
+        const created = await createSongRecord(song, {sourceFilename:item.filename,sourceFormat:'chordpro'});
+        state.songs.push(created);
+        newModels.push(created);
+        imported++;
+      }
+      item.imported = true;
+      item.selected = false;
+    }catch(error){
+      failures.push(`${item.filename}: ${error.message}`);
+    }
+  }
+
+  state.songs.sort((a,b)=>a.title.localeCompare(b.title));
+  state.bulkImporting = false;
+  state.bulkFiles = state.bulkFiles.filter(item=>!item.imported);
+  const successParts = [];
+  if(imported) successParts.push(`${imported} new song${imported===1?'':'s'} imported`);
+  if(replaced) successParts.push(`${replaced} existing song${replaced===1?'':'s'} replaced`);
+  if(failures.length){
+    state.bulkResult = { ok:false, message:`${successParts.join(' and ') || 'No songs were saved'}. ${failures.length} failed: ${failures.slice(0,3).join(' | ')}${failures.length>3?'…':''}` };
+  }else{
+    state.bulkResult = { ok:true, message:`${successParts.join(' and ')} successfully. The library is now updated for every device.` };
+  }
+  render();
 }
 
 /* ============================= CHORD MODE SHEET ============================= */
@@ -2715,18 +3451,28 @@ async function saveForm(){
 
   if(!title){ alert('Please give the song a title.'); return; }
 
-  if(state.editingId){
-    const idx = state.songs.findIndex(s=>s.id===state.editingId);
-    const { artist, ...existingSong } = state.songs[idx];
-    state.songs[idx] = { ...existingSong, title, key, body };
-    state.currentSongId = state.editingId;
-  } else {
-    const newSong = { id: uid(), title, key, body };
-    state.songs.push(newSong);
-    state.currentSongId = newSong.id;
+  try{
+    if(state.editingId){
+      const idx = state.songs.findIndex(s=>s.id===state.editingId);
+      if(idx < 0) throw new Error('This song is no longer in the library.');
+      const updated = await updateSongRecord(state.editingId, { ...state.songs[idx], title, key, body }, {
+        sourceFilename:state.songs[idx].sourceFilename || '',
+        sourceFormat:state.songs[idx].sourceFormat || 'manual'
+      });
+      state.songs[idx] = updated;
+      state.currentSongId = updated.id;
+    } else {
+      const created = await createSongRecord({ title, key, body, sourceFormat:'manual' }, {sourceFormat:'manual'});
+      state.songs.push(created);
+      state.currentSongId = created.id;
+    }
+  }catch(error){
+    console.error('Song save failed', error);
+    alert(`The song could not be saved to Supabase. ${error.message}`);
+    return;
   }
+
   state.songs.sort((a,b)=> a.title.localeCompare(b.title));
-  await saveSongs(state.songs);
   state.transpose = 0;
   state.chordMode = false;
   state.view = state.formReturnView === 'setlist' ? 'setlist' : 'song';
@@ -2735,38 +3481,72 @@ async function saveForm(){
 
 async function deleteSong(id){
   if(!confirm('Delete this song from the library? This cannot be undone.')) return;
+  try{
+    await deleteSongRecord(id);
+  }catch(error){
+    console.error('Song delete failed', error);
+    alert(`The song could not be deleted from Supabase. ${error.message}`);
+    return;
+  }
   state.songs = state.songs.filter(s=>s.id!==id);
   state.sundaySetlist = state.sundaySetlist.filter(songId=>songId!==id);
   delete state.setlistNotes[id];
-  await Promise.all([saveSongs(state.songs), saveSundaySetlist()]);
+  await saveSundaySetlist();
   state.view = 'library';
   render();
 }
 
 /* ============================= INIT ============================= */
 
+function recoverLegacySongIdMap(currentSongs){
+  if(Object.keys(legacySongIdMap).length || !legacySongSnapshot.length) return legacySongIdMap;
+  const unused = currentSongs.slice();
+  const map = {};
+  legacySongSnapshot.forEach(oldSong => {
+    let index = unused.findIndex(song =>
+      normalizeSongTitle(song.title) === normalizeSongTitle(oldSong.title) && song.body === String(oldSong.body || '')
+    );
+    if(index < 0) index = unused.findIndex(song=>normalizeSongTitle(song.title)===normalizeSongTitle(oldSong.title));
+    if(index >= 0){
+      const [song] = unused.splice(index,1);
+      map[String(oldSong.id)] = song.id;
+    }
+  });
+  legacySongIdMap = map;
+  return map;
+}
+
 async function init(){
   render();
   let songs = await loadSongs();
-  if(!songs){
-    songs = SAMPLE_SONGS;
-    await saveSongs(songs);
+  if(!songs.length){
+    try{
+      const created = await createSongRecord({ ...SAMPLE_SONGS[0], sourceFormat:'manual' }, {sourceFormat:'manual'});
+      songs = [created];
+    }catch(error){
+      console.warn('Could not create sample song', error);
+      songs = [];
+    }
   }
-  const hadArtistMetadata = songs.some(song => Object.prototype.hasOwnProperty.call(song, 'artist'));
-  state.songs = songs.map(song => {
-    const { artist, ...titleOnlySong } = song;
-    return titleOnlySong;
-  }).sort((a,b)=> a.title.localeCompare(b.title));
-  if(hadArtistMetadata) await saveSongs(state.songs);
+  state.songs = songs.sort((a,b)=> a.title.localeCompare(b.title));
+
   const setlistData = await loadSundaySetlist();
-  state.sundaySetlist = setlistData.songIds.filter((id,index,arr)=>
+  const idMap = recoverLegacySongIdMap(state.songs);
+  const remappedSongIds = setlistData.songIds.map(id=>idMap[String(id)] || String(id));
+  const remappedNotes = {};
+  Object.entries(setlistData.notes || {}).forEach(([id,note])=>{
+    remappedNotes[idMap[String(id)] || String(id)] = note;
+  });
+
+  state.sundaySetlist = remappedSongIds.filter((id,index,arr)=>
     arr.indexOf(id)===index && state.songs.some(song=>song.id===id)
   );
   state.setlistNotes = Object.fromEntries(
-    Object.entries(setlistData.notes || {}).filter(([id])=>state.sundaySetlist.includes(id))
+    Object.entries(remappedNotes).filter(([id])=>state.sundaySetlist.includes(id))
   );
   state.setlistLocked = Boolean(setlistData.locked);
-  if(state.sundaySetlist.length !== setlistData.songIds.length || setlistData.sundayDate !== currentSundayDateKey() || !setlistData.notes){
+  const changedIds = remappedSongIds.some((id,index)=>id!==String(setlistData.songIds[index]));
+  if(changedIds || state.sundaySetlist.length !== setlistData.songIds.length || setlistData.sundayDate !== currentSundayDateKey() || !setlistData.notes){
     await saveSundaySetlist();
   }
   state.loading = false;
